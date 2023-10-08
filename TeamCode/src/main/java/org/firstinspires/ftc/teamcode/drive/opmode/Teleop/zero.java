@@ -60,7 +60,7 @@ public class zero extends OpMode {
     @Override
     public void loop() {
 
-       
+
     }
 
     void TargetPosition(int ticks, DcMotorEx attachment) {
