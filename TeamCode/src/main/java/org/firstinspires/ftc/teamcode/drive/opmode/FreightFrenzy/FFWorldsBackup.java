@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.Teleop;
+package org.firstinspires.ftc.teamcode.drive.opmode.FreightFrenzy;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
