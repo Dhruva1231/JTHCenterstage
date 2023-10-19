@@ -5,6 +5,7 @@ package org.firstinspires.ftc.teamcode.drive.opmode.Teleop;
 import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.base;
 import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.initialize;
 import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.intake;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.out;
 import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.outtake;
 import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.pre;
 import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.transfer;
@@ -33,9 +34,13 @@ public class ScrimmageTeleop extends OpMode {
     private DcMotorEx rightBackDrive = null;
 
     public DcMotorEx intakeMotor;
+    public DcMotorEx outtakeMotor;
 
     public static double p;
     public static double e;
+    public static double outE;
+    public static double outR;
+    public static double outL;
 
     public Servo pivotleft;
 
@@ -44,6 +49,9 @@ public class ScrimmageTeleop extends OpMode {
     public Servo elbowleft;
 
     public Servo elbowright;
+    public Servo pivotOut;
+    public Servo outLeft;
+    public Servo outRight;
     private FtcDashboard dashboard = FtcDashboard.getInstance();
 
     public enum state {
@@ -51,12 +59,13 @@ public class ScrimmageTeleop extends OpMode {
         initialize,
         base,
         intake,
+        transferPos,
         transfer,
-        outtake,
-        barrier
+        outtakePos,
+        out
     }
 
-    private boolean fortnite = false;
+    private boolean fortnite = true;
 
     state state = pre;
     ElapsedTime timer  = new ElapsedTime();
@@ -66,11 +75,16 @@ public class ScrimmageTeleop extends OpMode {
         intakeLeftExt = hardwareMap.get(DcMotorEx.class, "lint");
         intakeRightExt = hardwareMap.get(DcMotorEx.class, "rint");
         intakeMotor = hardwareMap.get(DcMotorEx.class, "intake");
+        outtakeMotor = hardwareMap.get(DcMotorEx.class, "outtake");
 
         elbowleft = hardwareMap.get(Servo.class, "el");
         elbowright = hardwareMap.get(Servo.class, "er");
         pivotleft = hardwareMap.get(Servo.class, "pl");
         pivotright = hardwareMap.get(Servo.class, "pr");
+        pivotOut = hardwareMap.get(Servo.class, "outElbow");
+        outRight = hardwareMap.get(Servo.class, "outRight");
+        outLeft = hardwareMap.get(Servo.class, "outLeft");
+
 
         leftFrontDrive  = hardwareMap.get(DcMotorEx.class, "left_front");
         leftBackDrive  = hardwareMap.get(DcMotorEx.class, "left_rear");
@@ -81,8 +95,6 @@ public class ScrimmageTeleop extends OpMode {
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
-
-
     }
 
     @Override
@@ -99,6 +111,9 @@ public class ScrimmageTeleop extends OpMode {
         elbowright.setPosition(1-e);
         pivotleft.setPosition(1-p);
         pivotright.setPosition(p);
+        pivotOut.setPosition(outE);
+        outLeft.setPosition(outE);
+        outRight.setPosition(outE);
         double max;
 
 
@@ -166,23 +181,40 @@ public class ScrimmageTeleop extends OpMode {
                 }
                 break;
 
-            case transfer:
+            case transferPos:
                 if(timer.seconds() > 0.5){
                     e = 0.55;
                 }
                 if(timer.seconds() > 1){
                     p = 0.92;
                     timer.reset();
-                    state = outtake;
+                    state = transfer;
                 }
 
                 break;
 
-            case outtake:
+            case transfer:
                 if(gamepad1.dpad_down){
                     intakeMotor.setPower(1);
                 }
                 break;
+
+            case outtakePos:
+                if(timer.seconds() > 0.5) {
+                    outS = 0.5;
+                    timer.reset();
+                    state = out;
+                }
+                break;
+
+            case out:
+                if(timer.seconds() > 0.5){
+                    outS = 0.5;
+                    timer.reset();
+                }
+
+                break;
+
         }
     telemetry.addData("Status", "Run Time: " + timer.toString());
     telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
