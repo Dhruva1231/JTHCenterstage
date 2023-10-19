@@ -11,6 +11,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -20,6 +21,19 @@ public class ScrimmageTeleop extends OpMode {
 
     public DcMotorEx intakeLeftExt;
     public DcMotorEx intakeRightExt;
+
+    public static double pl;
+    public static double pr;
+    public static double el;
+    public static double er;
+
+    public Servo pivotleft;
+
+    public Servo pivotright;
+
+    public Servo elbowleft;
+
+    public Servo elbowright;
     private FtcDashboard dashboard = FtcDashboard.getInstance();
 
     public enum state {
@@ -39,6 +53,11 @@ public class ScrimmageTeleop extends OpMode {
     public void init(){
         intakeLeftExt = hardwareMap.get(DcMotorEx.class, "lint");
         intakeRightExt = hardwareMap.get(DcMotorEx.class, "rint");
+
+        elbowleft = hardwareMap.get(Servo.class, "elbowleft");
+        elbowright = hardwareMap.get(Servo.class, "elbowright");
+        pivotleft = hardwareMap.get(Servo.class, "pivotleft");
+        pivotright = hardwareMap.get(Servo.class, "pivotright");
     }
 
     @Override
@@ -48,6 +67,14 @@ public class ScrimmageTeleop extends OpMode {
 
     @Override
     public void loop(){
+
+
+        elbowleft.setPosition(el);
+        elbowright.setPosition(er);
+        pivotleft.setPosition(pl);
+        pivotright.setPosition(pr);
+
+
         switch (state) {
             case pre:
                 if(fortnite){
