@@ -87,7 +87,7 @@ public class ScrimmageTeleop extends OpMode {
         switch (state) {
             case pre:
                 //move to intake
-                if(timer.seconds() > 0.5 && gamepad1.dpad_down){
+                if(timer.seconds() > 1.5 && gamepad1.dpad_down){
                     p = 0.7;
                     timer.reset();
                     state = initialize;
@@ -95,7 +95,7 @@ public class ScrimmageTeleop extends OpMode {
                 break;
 
             case initialize:
-                if(timer.seconds() > 0.5 && gamepad1.dpad_down){
+                if(timer.seconds() > 1.5 && gamepad1.dpad_down){
                     e = 0.55;
                     timer.reset();
                     state = base;
@@ -104,7 +104,7 @@ public class ScrimmageTeleop extends OpMode {
 
             case base:
                 //move elbow to intake
-                if(timer.seconds() > 1 && gamepad1.dpad_down){
+                if(timer.seconds() > 1.5 && gamepad1.dpad_down){
                     p = 0.14;
                     timer.reset();
                     state = intake;
