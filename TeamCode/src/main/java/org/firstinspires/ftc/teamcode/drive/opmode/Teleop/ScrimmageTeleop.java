@@ -87,23 +87,25 @@ public class ScrimmageTeleop extends OpMode {
         switch (state) {
             case pre:
                 //move to intake
-                if(timer.seconds() > 0.5){
-                    p = 0.83;
+                if(timer.seconds() > 0.5 && gamepad1.dpad_down){
+                    p = 0.7;
                     timer.reset();
                     state = initialize;
                 }
                 break;
 
             case initialize:
-
-                
-
+                if(timer.seconds() > 0.5 && gamepad1.dpad_down){
+                    e = 0.55;
+                    timer.reset();
+                    state = base;
+                }
                 break;
 
             case base:
                 //move elbow to intake
-                if(timer.seconds() > 1){
-                    p = 0.7;
+                if(timer.seconds() > 1 && gamepad1.dpad_down){
+                    p = 0.14;
                     timer.reset();
                     state = intake;
                 }
@@ -139,14 +141,17 @@ public class ScrimmageTeleop extends OpMode {
                 if(gamepad1.dpad_down){
                     intakeMotor.setPower(1);
                 }
+                if(gamepad1.dpad_up){
+                    state = pre;
+                }
                 break;
         }
 
 
-    telemetry.addData("turret-rot-position", intakeLeftExt.getCurrentPosition());
-    telemetry.addData("arm-pivot-position", intakeRightExt.getCurrentPosition());
-    Telemetry telemetry = new MultipleTelemetry(this.telemetry, dashboard.getTelemetry());
-    telemetry.update();
+        telemetry.addData("turret-rot-position", intakeLeftExt.getCurrentPosition());
+        telemetry.addData("arm-pivot-position", intakeRightExt.getCurrentPosition());
+        Telemetry telemetry = new MultipleTelemetry(this.telemetry, dashboard.getTelemetry());
+        telemetry.update();
     }
 
 }
