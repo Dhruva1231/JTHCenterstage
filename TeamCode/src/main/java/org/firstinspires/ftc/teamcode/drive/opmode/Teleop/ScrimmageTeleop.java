@@ -4,6 +4,7 @@ package org.firstinspires.ftc.teamcode.drive.opmode.Teleop;
 
 import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.barrier;
 import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.base;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.deposit;
 import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.initialize;
 import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.intake;
 import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.outtake;
@@ -33,7 +34,7 @@ public class ScrimmageTeleop extends OpMode {
     public static double p = 0.93;
     public static double e = 0.65;
 
-    public static double r = 1;
+    public static double r = 0.95;
     public static double x = 0;
     public static double y = 1;
 
@@ -90,7 +91,7 @@ public class ScrimmageTeleop extends OpMode {
         pivotleft.setPosition(1-0.93);
         pivotright.setPosition(0.93);
 
-        pivotOut.setPosition(1);
+        pivotOut.setPosition(0.95);
         outRight.setPosition(0);
         outLeft.setPosition(1);
     }
@@ -167,7 +168,7 @@ public class ScrimmageTeleop extends OpMode {
             case base:
                 //move elbow to intake
                 if(timer.seconds() > 0.25){
-                    p = 0.12;
+                    p = 0.1;
                     timer.reset();
                     state = intake;
                 }
@@ -190,13 +191,13 @@ public class ScrimmageTeleop extends OpMode {
 
             case transfer:
                 if(timer.seconds() > 0.25){
-                    e = 0.65;
+                    e = 0.52;
                 }
                 if(timer.seconds() > 0.65){
                     p = 0.8;
                 }
                 if(timer.seconds() > 0.95){
-                    p = 0.93;
+                    p = 0.91;
                     timer.reset();
                     state = outtake;
                 }
@@ -214,7 +215,7 @@ public class ScrimmageTeleop extends OpMode {
                 break;
 
             case barrier:
-                if(gamepad1.x){
+                if(gamepad1.cross){
                     r = 0.75;
                 }
                 if(gamepad1.right_bumper){
@@ -223,6 +224,20 @@ public class ScrimmageTeleop extends OpMode {
                 if(gamepad1.left_bumper){
                     y = 0.3;
                 }
+                if(gamepad1.square){
+                    state = deposit;
+                }
+                break;
+
+            case deposit:
+                if(gamepad1.cross){
+                    y = 1;
+                    x = 0;
+                    r = 0.95;
+                    timer.reset();
+                    state = pre;
+                }
+
                 break;
         }
 
