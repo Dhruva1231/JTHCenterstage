@@ -22,8 +22,19 @@ public class CSZero extends LinearOpMode{
     public DcMotorEx intakeLeftExt;
     public DcMotorEx outtakeMotor;
     public DcMotorEx intakeRightExt;
-
+    private DcMotorEx leftFrontDrive;
+    private DcMotorEx leftBackDrive;
+    private DcMotorEx rightFrontDrive;
+    private DcMotorEx rightBackDrive;
     public void runOpMode() throws InterruptedException {
+
+
+
+        leftFrontDrive  = hardwareMap.get(DcMotorEx.class, "left_front");
+        leftBackDrive  = hardwareMap.get(DcMotorEx.class, "left_rear");
+        rightFrontDrive = hardwareMap.get(DcMotorEx.class, "right_front");
+        rightBackDrive = hardwareMap.get(DcMotorEx.class, "right_back");
+
 
         intakeLeftExt = hardwareMap.get(DcMotorEx.class, "lint");
         outtakeMotor = hardwareMap.get(DcMotorEx.class, "outtake");
@@ -38,6 +49,16 @@ public class CSZero extends LinearOpMode{
         intakeLeftExt.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         waitForStart();
+
+        leftBackDrive.setPower(0.5);
+        sleep(1000);
+        rightBackDrive.setPower(0.5);
+        sleep(1000);
+
+        rightFrontDrive.setPower(0.5);
+        sleep(1000);
+
+        leftFrontDrive.setPower(0.5);
 
     }
 

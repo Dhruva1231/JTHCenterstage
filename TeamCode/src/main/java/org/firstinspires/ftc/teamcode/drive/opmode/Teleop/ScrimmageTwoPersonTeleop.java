@@ -1,19 +1,18 @@
 package org.firstinspires.ftc.teamcode.drive.opmode.Teleop;
 
 
-
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.barrier;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.base;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.cancel;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.cancelinter1;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.cancelinter2;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.deposit;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.initialize;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.intake;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.intakeinter1;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.outtake;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.pre;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.transfer;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTwoPersonTeleop.state.barrier;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTwoPersonTeleop.state.base;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTwoPersonTeleop.state.cancel;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTwoPersonTeleop.state.cancelinter1;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTwoPersonTeleop.state.cancelinter2;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTwoPersonTeleop.state.deposit;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTwoPersonTeleop.state.initialize;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTwoPersonTeleop.state.intake;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTwoPersonTeleop.state.intakeinter1;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTwoPersonTeleop.state.outtake;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTwoPersonTeleop.state.pre;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTwoPersonTeleop.state.transfer;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -26,13 +25,17 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Config
-@TeleOp(name="Scrimmage Teleop")
-public class ScrimmageTeleop extends OpMode {
+@TeleOp(name="Scrimmage Two Teleop ")
+public class ScrimmageTwoPersonTeleop extends OpMode {
 
+    private double slow = 1.0;
+    private double turnslow = 1.0;
+    private double progSlowmode = 1.0;
     boolean onOff = false;
     public DcMotorEx intakeLeftExt;
     public DcMotorEx outtakeMotor;
@@ -43,7 +46,7 @@ public class ScrimmageTeleop extends OpMode {
 
     public static double Lp = 0.006, Li = 0, Ld = 0.0001;
 
-    //Ltarget Max 600, Min -75
+    //Ltarget Max 750, Min -75
     public static int Ltarget;
 
     //Otarget Max 800, Min 25
@@ -160,9 +163,11 @@ public class ScrimmageTeleop extends OpMode {
         double max;
 
 
-        double axial   = -gamepad1.left_stick_y;
-        double lateral =  gamepad1.left_stick_x;
-        double yaw     =  gamepad1.right_stick_x;
+        double axial   = -gamepad1.left_stick_y * slow * progSlowmode;
+        double lateral =  gamepad1.left_stick_x * slow * progSlowmode;
+        double yaw     =  gamepad1.right_stick_x * turnslow * progSlowmode;
+
+        progSlowmode = Range.clip(-0.666*(gamepad1.left_trigger) + 1, 0, 1);
 
         double leftFrontPower  = axial + lateral + yaw;
         double rightFrontPower = axial - lateral - yaw;
@@ -267,7 +272,7 @@ public class ScrimmageTeleop extends OpMode {
                 break;
             case pre:
                 //move to intake
-                if(gamepad1.cross){
+                if(gamepad1.right_bumper){
                     Otarget = 10;
                     p = 0.75;
                     timer.reset();
@@ -293,40 +298,56 @@ public class ScrimmageTeleop extends OpMode {
                 break;
 
             case intake:
-                if(gamepad1.right_bumper){
+                if(gamepad2.right_bumper){
+                    slow = 0.5;
+                    turnslow = 0.3;
+                    e = 0.89;
+                    Ltarget = 750;
+                }
+                if(gamepad2.left_bumper){
+                    slow = 0.5;
+                    turnslow = 0.3;
                     e = 0.89;
                     Ltarget = 600;
                 }
-                if(gamepad1.left_bumper){
+                if(gamepad2.right_trigger > 0.2){
+                    slow = 0.75;
+                    turnslow = 0.5;
                     e = 0.89;
-                    Ltarget = 450;
+                    Ltarget = 400;
                 }
-                if(gamepad1.right_trigger > 0.2){
+                if(gamepad2.left_trigger > 0.2){
+                    slow = 1;
+                    turnslow = 1;
                     e = 0.89;
-                    Ltarget = 300;
-                }
-                if(gamepad1.left_trigger > 0.2){
-                    e = 0.89;
-                    Ltarget = 100;
+                    Ltarget = 0;
                 }
 
-                if(gamepad1.cross && !onOff && holdtimer.seconds() > 0.1 && !(intakeLeftExt.getVelocity() > 25)){
+                int lstickpos1 = (int) (5 * gamepad2.right_stick_y);
+
+                if(gamepad2.right_stick_y != 0){
+                    Ltarget = Ltarget - lstickpos1;
+                }
+
+                if(gamepad1.right_bumper && !onOff && holdtimer.seconds() > 0.25 && !(intakeLeftExt.getVelocity() > 25)){
                     holdtimer.reset();
                     onOff = true;
-                    e = 0.8;
+                    e = 0.83;
                     intakeMotor.setPower(-1);
-                }else if(gamepad1.cross && onOff && holdtimer.seconds() > 0.1 && !(intakeLeftExt.getVelocity() > 25)){
+                }else if(gamepad1.right_bumper && onOff && holdtimer.seconds() > 0.25 && !(intakeLeftExt.getVelocity() > 25)){
                     holdtimer.reset();
                     onOff = false;
                     intakeMotor.setPower(0);
                     e = 0.89;
-                }else if(gamepad1.circle){
+                }else if(gamepad1.left_bumper){
                     holdtimer.reset();
                     onOff = false;
                     intakeMotor.setPower(1);
                 }
 
-                if(gamepad1.dpad_down){
+                if(gamepad2.cross){
+                    slow = 1;
+                    turnslow = 1;
                     p = 0.7;
                     intakeMotor.setPower(-0.5);
                     timer.reset();
@@ -358,7 +379,7 @@ public class ScrimmageTeleop extends OpMode {
                 break;
 
             case outtake:
-                if(timer.seconds() > 0.35 && gamepad1.cross){
+                if(timer.seconds() > 0.35 && gamepad1.right_bumper){
                     intakeMotor.setPower(0.8);
                     timer.reset();
                     state = barrier;
@@ -369,24 +390,44 @@ public class ScrimmageTeleop extends OpMode {
                 if(timer.seconds() > 1.5){
                     intakeMotor.setPower(0);
                 }
+                int lstickpos2 = (int) (10 * gamepad2.right_stick_y);
 
-                if(gamepad1.cross && timer.seconds() > 1.65){
+                if(gamepad2.right_stick_y != 0){
+                    Otarget = Otarget - lstickpos2;
+                }
+
+                if(gamepad2.right_bumper && timer.seconds() > 1.65){
+                    r = 0.75;
+                    Otarget = 800;
+                }
+                if(gamepad2.left_bumper && timer.seconds() > 1.65){
                     r = 0.75;
                     Otarget = 700;
                 }
+
+                if(gamepad2.right_trigger > 0.1 && timer.seconds() > 1.65){
+                    r = 0.75;
+                    Otarget = 500;
+                }
+
+                if(gamepad2.left_trigger > 0.1 && timer.seconds() > 1.65){
+                    r = 0.75;
+                    Otarget = 350;
+                }
+
                 if(gamepad1.right_bumper && timer.seconds() > 1.65){
                     x = 0.7;
                 }
                 if(gamepad1.left_bumper && timer.seconds() > 1.65){
                     y = 0.3;
                 }
-                if(gamepad1.square && timer.seconds() > 1.65){
+                if(gamepad2.square && timer.seconds() > 1.65){
                     state = deposit;
                 }
                 break;
 
             case deposit:
-                if(gamepad1.cross){
+                if(gamepad2.cross){
                     Otarget = 100;
                     y = 1;
                     x = 0;
