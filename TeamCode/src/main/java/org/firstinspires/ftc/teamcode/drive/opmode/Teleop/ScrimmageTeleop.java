@@ -7,6 +7,7 @@ import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop
 import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.deposit;
 import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.initialize;
 import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.intake;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.intakeinter1;
 import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.outtake;
 import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.pre;
 import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop.state.transfer;
@@ -14,9 +15,11 @@ import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTeleop
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -25,16 +28,32 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 @Config
 @TeleOp(name="Scrimmage Teleop")
 public class ScrimmageTeleop extends OpMode {
-
     public DcMotorEx intakeLeftExt;
+    public DcMotorEx outtakeMotor;
     public DcMotorEx intakeRightExt;
+    private PIDController Lcontroller;
+    private PIDController Ocontroller;
+
+
+    public static double Lp = 0.006, Li = 0, Ld = 0.0001;
+
+    //Ltarget Max 600, Min -75
+    public static int Ltarget;
+
+    //Otarget Max 800, Min 25
+    public static int Otarget;
+
+    public static double Op = 0.012, Oi = 0, Od = 0.0002;
+    public static double Of = -0.08;
+
+
 
     public DcMotorEx intakeMotor;
 
-    public static double p = 0.93;
-    public static double e = 0.65;
+    public static double p = 0.7;
+    public static double e = 0.4;
 
-    public static double r = 0.95;
+    public static double r = 0.92;
     public static double x = 0;
     public static double y = 1;
 
@@ -47,7 +66,6 @@ public class ScrimmageTeleop extends OpMode {
     public Servo elbowright;
     public Servo pivotOut;
 
-    public DcMotorEx outtakeMotor;
 
     private FtcDashboard dashboard = FtcDashboard.getInstance();
 
@@ -56,6 +74,7 @@ public class ScrimmageTeleop extends OpMode {
         initialize,
         base,
         intake,
+        intakeinter1,
         transfer,
         outtake,
         barrier,
@@ -72,8 +91,20 @@ public class ScrimmageTeleop extends OpMode {
 
     @Override
     public void init(){
+
+        Lcontroller = new PIDController(Lp,Li,Ld);
+        Ocontroller = new PIDController(Op,Oi,Od);
+
         intakeLeftExt = hardwareMap.get(DcMotorEx.class, "lint");
+        outtakeMotor = hardwareMap.get(DcMotorEx.class, "outtake");
         intakeRightExt = hardwareMap.get(DcMotorEx.class, "rint");
+
+        outtakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        intakeLeftExt.setDirection(DcMotorSimple.Direction.REVERSE);
+        intakeRightExt.setDirection(DcMotorSimple.Direction.REVERSE);
+
+
+
         intakeMotor = hardwareMap.get(DcMotorEx.class, "intake");
 
         elbowleft = hardwareMap.get(Servo.class, "el");
@@ -81,17 +112,16 @@ public class ScrimmageTeleop extends OpMode {
         pivotleft = hardwareMap.get(Servo.class, "pl");
         pivotright = hardwareMap.get(Servo.class, "pr");
         pivotOut = hardwareMap.get(Servo.class, "outElbow");
-        outtakeMotor = hardwareMap.get(DcMotorEx.class, "outtake");
 
         outRight = hardwareMap.get(Servo.class, "outRight");
         outLeft = hardwareMap.get(Servo.class, "outLeft");
 
-        elbowleft.setPosition(0.65);
-        elbowright.setPosition(1-0.65);
-        pivotleft.setPosition(1-0.93);
-        pivotright.setPosition(0.93);
+        elbowleft.setPosition(0.4);
+        elbowright.setPosition(1-0.4);
+        pivotleft.setPosition(1-0.7);
+        pivotright.setPosition(0.7);
 
-        pivotOut.setPosition(0.95);
+        pivotOut.setPosition(0.92);
         outRight.setPosition(0);
         outLeft.setPosition(1);
     }
@@ -151,6 +181,7 @@ public class ScrimmageTeleop extends OpMode {
             case pre:
                 //move to intake
                 if(gamepad1.cross){
+                    Otarget = 20;
                     p = 0.75;
                     timer.reset();
                     state = initialize;
@@ -159,7 +190,7 @@ public class ScrimmageTeleop extends OpMode {
 
             case initialize:
                 if(timer.seconds() > 0.5){
-                    e = 0.83;
+                    e = 0.75;
                     timer.reset();
                     state = base;
                 }
@@ -175,6 +206,9 @@ public class ScrimmageTeleop extends OpMode {
                 break;
 
             case intake:
+                if(gamepad1.square){
+                    Ltarget = 400;
+                }
                 if(gamepad1.cross){
                     intakeMotor.setPower(-1);
                 }else{
@@ -185,65 +219,104 @@ public class ScrimmageTeleop extends OpMode {
                     p = 0.3;
                     intakeMotor.setPower(-0.5);
                     timer.reset();
+                    state = intakeinter1;
+                }
+                break;
+
+            case intakeinter1:
+                if(timer.seconds() > 0.5){
+                    e = 0.52;
+                    Ltarget = 50;
+                }
+
+                if(timer.seconds() > 1.25){
+                    p = 0.7;
+                    Ltarget = -50;
+                    timer.reset();
                     state = transfer;
                 }
+
                 break;
 
             case transfer:
-                if(timer.seconds() > 0.25){
-                    e = 0.52;
-                }
-                if(timer.seconds() > 0.65){
-                    p = 0.8;
-                }
-                if(timer.seconds() > 0.95){
-                    p = 0.91;
+                if(timer.seconds() > 0.35){
+                    p = 0.92;
                     timer.reset();
                     state = outtake;
                 }
-
                 break;
 
             case outtake:
-                if(timer.seconds() > 0.5){
-                    intakeMotor.setPower(1);
-                }
-                if(timer.seconds() > 1.5 && gamepad1.x){
-                    intakeMotor.setPower(0);
+                if(timer.seconds() > 0.5 && gamepad1.cross){
+                    intakeMotor.setPower(0.6);
+                    timer.reset();
                     state = barrier;
                 }
                 break;
 
             case barrier:
-                if(gamepad1.cross){
+                if(timer.seconds() > 2){
+                    intakeMotor.setPower(0);
+                }
+
+                if(gamepad1.cross && timer.seconds() > 2.3){
+                    Otarget = 500;
                     r = 0.75;
                 }
-                if(gamepad1.right_bumper){
+                if(gamepad1.right_bumper && timer.seconds() > 2.3){
                     x = 0.7;
                 }
-                if(gamepad1.left_bumper){
+                if(gamepad1.left_bumper && timer.seconds() > 2.3){
                     y = 0.3;
                 }
-                if(gamepad1.square){
+                if(gamepad1.square && timer.seconds() > 2.3){
                     state = deposit;
                 }
                 break;
 
             case deposit:
                 if(gamepad1.cross){
+                    Otarget = 100;
                     y = 1;
                     x = 0;
-                    r = 0.95;
+                    r = 0.93;
                     timer.reset();
                     state = pre;
                 }
-
                 break;
         }
 
 
-        telemetry.addData("turret-rot-position", intakeLeftExt.getCurrentPosition());
-        telemetry.addData("arm-pivot-position", intakeRightExt.getCurrentPosition());
+        Lcontroller.setPID(Lp, Li, Ld);
+
+        int armPos = intakeLeftExt.getCurrentPosition();
+
+        double Lpid = Lcontroller.calculate(armPos, Ltarget);
+
+        double Lpower = Lpid;
+
+        outtakeMotor.setPower(Lpower);
+        intakeRightExt.setPower(Lpower);
+
+
+        Ocontroller.setPID(Op, Oi, Od);
+
+        int outPos = outtakeMotor.getCurrentPosition();
+
+        double Opid = Ocontroller.calculate(outPos, -Otarget);
+        double Off = Of;
+
+
+        double Opower = Opid + Off;
+
+        intakeLeftExt.setPower(Opower);
+
+
+        telemetry.addData("left", intakeLeftExt.getCurrentPosition());
+        telemetry.addData("right", intakeRightExt.getCurrentPosition());
+        telemetry.addData("out", outtakeMotor.getCurrentPosition());
+
+
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, dashboard.getTelemetry());
         telemetry.update();
     }
