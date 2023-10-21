@@ -235,7 +235,7 @@ public class ScrimmageTeleop extends OpMode {
                     timer.reset();
                     state = cancelinter1;
                 }else{
-                    Otarget = 10;
+                    Otarget = -25;
                     p = 0.75;
                     e = 0.8;
                     timer.reset();
@@ -258,7 +258,7 @@ public class ScrimmageTeleop extends OpMode {
                     Ltarget = -50;
                 }
                 if(timer.seconds() > 0.75){
-                    Otarget = 10;
+                    Otarget = -25;
                     p = 0.75;
                     e = 0.8;
                     timer.reset();
@@ -268,7 +268,7 @@ public class ScrimmageTeleop extends OpMode {
             case pre:
                 //move to intake
                 if(gamepad1.cross){
-                    Otarget = 10;
+                    Otarget = -20;
                     p = 0.75;
                     timer.reset();
                     state = initialize;
@@ -387,7 +387,7 @@ public class ScrimmageTeleop extends OpMode {
 
             case deposit:
                 if(gamepad1.cross){
-                    Otarget = 100;
+                    Otarget = -20;
                     y = 1;
                     x = 0;
                     r = 0.93;

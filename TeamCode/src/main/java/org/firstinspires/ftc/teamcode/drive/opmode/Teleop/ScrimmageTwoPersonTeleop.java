@@ -11,6 +11,8 @@ import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTwoPer
 import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTwoPersonTeleop.state.intake;
 import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTwoPersonTeleop.state.intakeinter1;
 import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTwoPersonTeleop.state.outtake;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTwoPersonTeleop.state.outtakeinter;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTwoPersonTeleop.state.outtakepre;
 import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTwoPersonTeleop.state.pre;
 import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.ScrimmageTwoPersonTeleop.state.transfer;
 
@@ -18,24 +20,33 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.controller.PIDController;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.hardware.rev.RevTouchSensor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @Config
 @TeleOp(name="Scrimmage Two Teleop ")
 public class ScrimmageTwoPersonTeleop extends OpMode {
 
+    private IMU imu;
     private double slow = 1.0;
     private double turnslow = 1.0;
     private double progSlowmode = 1.0;
+
+    private boolean left = false;
+    private boolean right = false;
     boolean onOff = false;
     public DcMotorEx intakeLeftExt;
     public DcMotorEx outtakeMotor;
@@ -60,11 +71,11 @@ public class ScrimmageTwoPersonTeleop extends OpMode {
     public DcMotorEx intakeMotor;
 
     public static double p = 0.7;
-    public static double e = 0.4;
+    public static double e = 0.52;
 
-    public static double r = 0.91;
-    public static double x = 0;
-    public static double y = 1;
+    public static double r = 0.92;
+    public static double x1 = 0;
+    public static double y1 = 1;
 
     public Servo pivotleft;
 
@@ -75,12 +86,16 @@ public class ScrimmageTwoPersonTeleop extends OpMode {
     public Servo elbowright;
     public Servo pivotOut;
 
+    private int counter = 0;
+
     private DcMotorEx leftFrontDrive;
     private DcMotorEx leftBackDrive;
     private DcMotorEx rightFrontDrive;
     private DcMotorEx rightBackDrive;
     private FtcDashboard dashboard = FtcDashboard.getInstance();
 
+    private boolean posLockOut = false;
+    private boolean posLockInt = false;
     public enum state {
         cancel,
         cancelinter1,
@@ -93,9 +108,15 @@ public class ScrimmageTwoPersonTeleop extends OpMode {
         intakeinter1,
         transfer,
         outtake,
+        outtakepre,
+        outtakeinter,
         barrier,
         deposit
     }
+
+    public double targetAngleOut = Math.toRadians(90);
+    public double targetAngleInt = Math.toRadians(90);
+    public double currentAngle;
 
     private boolean fortnite = false;
 
@@ -106,8 +127,24 @@ public class ScrimmageTwoPersonTeleop extends OpMode {
     public Servo outLeft;
     public Servo outRight;
 
+    public static double Hp = 0.03;
+
+
+
+
     @Override
     public void init(){
+
+
+            // Retrieve the IMU from the hardware map
+            imu = hardwareMap.get(IMU.class, "imu");
+            // Adjust the orientation parameters to match your robot
+            IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
+                    RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                    RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
+            // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
+            imu.initialize(parameters);
+
 
         Lcontroller = new PIDController(Lp,Li,Ld);
         Ocontroller = new PIDController(Op,Oi,Od);
@@ -125,6 +162,11 @@ public class ScrimmageTwoPersonTeleop extends OpMode {
         leftBackDrive  = hardwareMap.get(DcMotorEx.class, "left_rear");
         rightFrontDrive = hardwareMap.get(DcMotorEx.class, "right_front");
         rightBackDrive = hardwareMap.get(DcMotorEx.class, "right_back");
+
+        leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         leftFrontDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         leftBackDrive.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -161,13 +203,11 @@ public class ScrimmageTwoPersonTeleop extends OpMode {
 
 
         double max;
-
-
         double axial   = -gamepad1.left_stick_y * slow * progSlowmode;
         double lateral =  gamepad1.left_stick_x * slow * progSlowmode;
         double yaw     =  gamepad1.right_stick_x * turnslow * progSlowmode;
 
-        progSlowmode = Range.clip(-0.666*(gamepad1.left_trigger) + 1, 0, 1);
+        progSlowmode = Range.clip(-0.83*(gamepad1.left_trigger) + 1, 0, 1);
 
         double leftFrontPower  = axial + lateral + yaw;
         double rightFrontPower = axial - lateral - yaw;
@@ -178,7 +218,6 @@ public class ScrimmageTwoPersonTeleop extends OpMode {
         max = Math.max(max, Math.abs(leftBackPower));
         max = Math.max(max, Math.abs(rightBackPower));
 
-
         if (max > 1.0) {
             leftFrontPower  /= max;
             rightFrontPower /= max;
@@ -186,20 +225,59 @@ public class ScrimmageTwoPersonTeleop extends OpMode {
             rightBackPower  /= max;
         }
 
+        double currentHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        double errorOut = Math.toDegrees(currentHeading) - Math.toDegrees(targetAngleOut);
+        double errorInt = Math.toDegrees(currentHeading) - Math.toDegrees(targetAngleInt);
+        double admissibleError = Math.toRadians(1);
+
+        if(gamepad1.options){
+            targetAngleOut = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        }
+        if(gamepad1.share){
+            targetAngleInt = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        }
+
+        if((Math.abs(errorInt) > admissibleError) && posLockInt){
+            leftFrontPower += errorInt*Hp;
+            leftBackPower += errorInt*Hp;
+            rightBackPower += -errorInt*Hp;
+            rightFrontPower += -errorInt*Hp;
+        }
+
+        if((Math.abs(errorOut) > admissibleError) && posLockOut){
+            leftFrontPower += errorOut*Hp;
+            leftBackPower += errorOut*Hp;
+            rightBackPower += -errorOut*Hp;
+            rightFrontPower += -errorOut*Hp;
+        }
+
+        telemetry.addData("currentheading", currentHeading);
+        telemetry.addData("error", errorOut);
+
+
         leftFrontDrive.setPower(leftFrontPower);
         rightFrontDrive.setPower(rightFrontPower);
         leftBackDrive.setPower(leftBackPower);
         rightBackDrive.setPower(rightBackPower);
 
-
+        if(gamepad1.dpad_down){
+            posLockInt = true;
+            posLockOut = false;
+        }else if(gamepad1.dpad_up){
+            posLockInt = false;
+            posLockOut = true;
+        }else if(gamepad1.dpad_left || gamepad1.dpad_right){
+            posLockInt = false;
+            posLockOut = false;
+        }
 
         elbowleft.setPosition(e);
         elbowright.setPosition(1-e);
         pivotleft.setPosition(1-p);
         pivotright.setPosition(p);
         pivotOut.setPosition(r);
-        outRight.setPosition(x);
-        outLeft.setPosition(y);
+        outRight.setPosition(x1);
+        outLeft.setPosition(y1);
         //1 is zero pos
         //0.75 is outtake
 
@@ -240,7 +318,7 @@ public class ScrimmageTwoPersonTeleop extends OpMode {
                     timer.reset();
                     state = cancelinter1;
                 }else{
-                    Otarget = 10;
+                    Otarget = -5;
                     p = 0.75;
                     e = 0.8;
                     timer.reset();
@@ -263,7 +341,7 @@ public class ScrimmageTwoPersonTeleop extends OpMode {
                     Ltarget = -50;
                 }
                 if(timer.seconds() > 0.75){
-                    Otarget = 10;
+                    Otarget = -5;
                     p = 0.75;
                     e = 0.8;
                     timer.reset();
@@ -272,16 +350,20 @@ public class ScrimmageTwoPersonTeleop extends OpMode {
                 break;
             case pre:
                 //move to intake
-                if(gamepad1.right_bumper){
-                    Otarget = 10;
-                    p = 0.75;
+                if(gamepad2.dpad_down){
+                    Otarget = -5;
+                    if(counter == 0){
+                        p = 0.3;
+                    }else{
+                        p = 0.1;
+                    }
                     timer.reset();
                     state = initialize;
                 }
                 break;
 
             case initialize:
-                if(timer.seconds() > 0.5){
+                if(timer.seconds() > 0.25){
                     e = 0.89;
                     timer.reset();
                     state = base;
@@ -290,7 +372,7 @@ public class ScrimmageTwoPersonTeleop extends OpMode {
 
             case base:
                 //move pivot to intake
-                if(timer.seconds() > 0.25){
+                if(timer.seconds() > 0.15){
                     p = 0.1;
                     timer.reset();
                     state = intake;
@@ -323,7 +405,7 @@ public class ScrimmageTwoPersonTeleop extends OpMode {
                     Ltarget = 0;
                 }
 
-                int lstickpos1 = (int) (5 * gamepad2.right_stick_y);
+                int lstickpos1 = (int) (20 * gamepad2.right_stick_y);
 
                 if(gamepad2.right_stick_y != 0){
                     Ltarget = Ltarget - lstickpos1;
@@ -345,7 +427,7 @@ public class ScrimmageTwoPersonTeleop extends OpMode {
                     intakeMotor.setPower(1);
                 }
 
-                if(gamepad2.cross){
+                if(gamepad2.dpad_up){
                     slow = 1;
                     turnslow = 1;
                     p = 0.7;
@@ -357,40 +439,57 @@ public class ScrimmageTwoPersonTeleop extends OpMode {
 
             case intakeinter1:
                 if(timer.seconds() > 0.25){
-                    e = 0.57;
-                    Ltarget = 50;
-                }
-
-                if(timer.seconds() > 0.75){
-                    Ltarget = -75;
+                    e = 0.52;
+                    Ltarget = -15;
                     timer.reset();
                     state = transfer;
                 }
-
                 break;
 
             case transfer:
-                if(timer.seconds() > 0.35 && Math.abs(Ltarget - intakeLeftExt.getCurrentPosition()) < 75){
+                int lstickpos3 = (int) (20 * gamepad2.right_stick_y);
+
+                if(gamepad2.right_stick_y != 0){
+                    Ltarget = Ltarget - lstickpos3;
+                }
+
+                if(timer.seconds() > 0.35 && intakeLeftExt.getCurrentPosition() < 25){
                     intakeMotor.setPower(0);
-                    p = 0.98;
+                    p = 1;
                     timer.reset();
                     state = outtake;
                 }
                 break;
 
             case outtake:
-                if(timer.seconds() > 0.35 && gamepad1.right_bumper){
-                    intakeMotor.setPower(0.8);
+                if(timer.seconds() > 0.35 && gamepad2.square){
+                    timer.reset();
+                    state = outtakepre;
+                }
+                break;
+
+            case outtakepre:
+                intakeMotor.setPower((Math.pow((timer.seconds()), 2) * 1.25));
+
+                if(timer.seconds() > 1.25){
+                    timer.reset();
+                    state = outtakeinter;
+                }
+                break;
+
+            case outtakeinter:
+                if(timer.seconds() > 0.05){
+                    intakeMotor.setPower(0);
                     timer.reset();
                     state = barrier;
                 }
                 break;
 
             case barrier:
-                if(timer.seconds() > 1.5){
-                    intakeMotor.setPower(0);
-                }
-                int lstickpos2 = (int) (10 * gamepad2.right_stick_y);
+                intakeMotor.setPower(gamepad2.left_stick_y * 0.5);
+
+
+                int lstickpos2 = (int) (15 * gamepad2.right_stick_y);
 
                 if(gamepad2.right_stick_y != 0){
                     Otarget = Otarget - lstickpos2;
@@ -415,26 +514,31 @@ public class ScrimmageTwoPersonTeleop extends OpMode {
                     Otarget = 350;
                 }
 
-                if(gamepad1.right_bumper && timer.seconds() > 1.65){
-                    x = 0.7;
-                }
                 if(gamepad1.left_bumper && timer.seconds() > 1.65){
-                    y = 0.3;
+                    p = 0.3;
+                    left = true;
+                    x1 = 0.7;
                 }
-                if(gamepad2.square && timer.seconds() > 1.65){
+                if(gamepad1.right_bumper && timer.seconds() > 1.65){
+                    p = 0.3;
+                    right = true;
+                    y1 = 0.3;
+                }
+                if(gamepad2.circle && timer.seconds() > 1.65 && left && right){
                     state = deposit;
                 }
                 break;
 
             case deposit:
-                if(gamepad2.cross){
-                    Otarget = 100;
-                    y = 1;
-                    x = 0;
-                    r = 0.93;
-                    timer.reset();
-                    state = pre;
-                }
+                e = 0.89;
+                left = false;
+                right = false;
+                Otarget = 250;
+                y1 = 1;
+                x1 = 0;
+                r = 0.92;
+                timer.reset();
+                state = pre;
                 break;
         }
 
