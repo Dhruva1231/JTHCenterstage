@@ -30,14 +30,14 @@ public class CSZero extends LinearOpMode{
 
 
 
-        leftFrontDrive  = hardwareMap.get(DcMotorEx.class, "left_front");
-        leftBackDrive  = hardwareMap.get(DcMotorEx.class, "left_rear");
-        rightFrontDrive = hardwareMap.get(DcMotorEx.class, "right_front");
-        rightBackDrive = hardwareMap.get(DcMotorEx.class, "right_back");
+        leftFrontDrive  = hardwareMap.get(DcMotorEx.class, "lf");
+        leftBackDrive  = hardwareMap.get(DcMotorEx.class, "lb");
+        rightFrontDrive = hardwareMap.get(DcMotorEx.class, "rf");
+        rightBackDrive = hardwareMap.get(DcMotorEx.class, "rb");
 
 
         intakeLeftExt = hardwareMap.get(DcMotorEx.class, "lint");
-        outtakeMotor = hardwareMap.get(DcMotorEx.class, "outtake");
+        outtakeMotor = hardwareMap.get(DcMotorEx.class, "out");
         intakeRightExt = hardwareMap.get(DcMotorEx.class, "rint");
 
         outtakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
