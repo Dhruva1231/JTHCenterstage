@@ -77,7 +77,7 @@ public class RebuildTeleop extends OpMode {
     public static double v = 0.9;
     public static double x1 = 0;
     public static double y1 = 1;
-    public static double z1 = 0.95;
+    public static double z1 = 0.51;
 
     public Servo pivotleft;
 
@@ -197,7 +197,7 @@ public class RebuildTeleop extends OpMode {
         fourbar.setPosition(0.9);
         outRight.setPosition(0);
         outLeft.setPosition(1);
-        wrist.setPosition(0.95);
+        wrist.setPosition(0.51);
     }
 
     @Override
@@ -333,7 +333,7 @@ public class RebuildTeleop extends OpMode {
                 }else{
                     Otarget = -5;
                     p = 0.8;
-                    e = 0.765;
+                    e = 0.785;
                     timer.reset();
                     New = base;
                 }
@@ -363,7 +363,7 @@ public class RebuildTeleop extends OpMode {
 
             case pre:
                 //move to intake
-                Otarget = 38;
+                Otarget = 20;
                 if(counter == 0){
                     p = 0.3;
                 }else{
@@ -441,7 +441,7 @@ public class RebuildTeleop extends OpMode {
                 if(gamepad2.dpad_up || gamepad1.dpad_up){
                     slow = 1;
                     turnslow = 1;
-                    e = 0.765;
+                    e = 0.785;
                     p = 0.8;
                     intakeMotor.setPower(-0.5);
                     timer.reset();
@@ -514,11 +514,23 @@ public class RebuildTeleop extends OpMode {
                     Otarget = Otarget - lstickpos2;
                 }
                 if(timer.seconds() > 0){
-                    r = 0.05;
+                    r = 0.08;
                 }
                 if(timer.seconds() > 0.2){
                     v = 0.7;
                 }
+
+                if(gamepad1.right_trigger > 0 && gamepad1.left_trigger > 0){
+                    z1 = 0.51;
+
+                }
+                else if(gamepad1.right_trigger > 0){
+                    z1 = 0.15;
+                }
+                else if(gamepad1.left_trigger > 0){
+                    z1 = 0.86;
+                }
+
                 if(gamepad2.right_bumper && timer.seconds() > 1.25){
                     Otarget = 800;
                 }
@@ -534,12 +546,12 @@ public class RebuildTeleop extends OpMode {
                     Otarget = 350;
                 }
 
-                if(gamepad1.left_bumper && timer.seconds() > 0.5){
+                if(gamepad1.right_bumper && timer.seconds() > 0.5){
                     p = 0.3;
                     left = true;
                     x1 = 0;
                 }
-                if(gamepad1.right_bumper && timer.seconds() > 0.5){
+                if(gamepad1.left_bumper && timer.seconds() > 0.5){
                     p = 0.3;
                     right = true;
                     y1 = 1;
@@ -552,6 +564,7 @@ public class RebuildTeleop extends OpMode {
 
             case deposit:
                 if(timer.seconds() > 0.5){
+                    z1 = 0.51;
                     leftBackPower += -0.3;
                     leftFrontPower += -0.3;
                     rightBackPower += -0.3;
