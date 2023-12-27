@@ -33,6 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 
 @TeleOp(name="CenterStage Teleop", group="Linear Opmode")
 
@@ -42,13 +43,22 @@ public class CS_Teleop extends LinearOpMode {
     private DcMotor leftBackDrive = null;
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
+    private double leftFrontPower = 0.3;
+    private double rightFrontPower = 0.3;
+    private double leftBackPower = 0.3;
+    private double rightBackPower = 0.3;
+
+    AnalogInput sensor1;
+    AnalogInput sensor2;
 
     @Override
     public void runOpMode() {
-        leftFrontDrive  = hardwareMap.get(DcMotor.class, "left_front");
-        leftBackDrive  = hardwareMap.get(DcMotor.class, "left_rear");
-        rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front");
-        rightBackDrive = hardwareMap.get(DcMotor.class, "right_back");
+        leftFrontDrive  = hardwareMap.get(DcMotor.class, "lf");
+        leftBackDrive  = hardwareMap.get(DcMotor.class, "lb");
+        rightFrontDrive = hardwareMap.get(DcMotor.class, "rf");
+        rightBackDrive = hardwareMap.get(DcMotor.class, "rb");
+        sensor1 = hardwareMap.get(AnalogInput.class, "dist1");
+        sensor2 = hardwareMap.get(AnalogInput.class, "dist2");
 
         leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
@@ -62,37 +72,23 @@ public class CS_Teleop extends LinearOpMode {
         runtime.reset();
 
         while (opModeIsActive()) {
-            double max;
-
-
-            double axial   = -gamepad1.left_stick_y;
-            double lateral =  gamepad1.left_stick_x;
-            double yaw     =  gamepad1.right_stick_x;
-
-            double leftFrontPower  = axial + lateral + yaw;
-            double rightFrontPower = axial - lateral - yaw;
-            double leftBackPower   = axial - lateral + yaw;
-            double rightBackPower  = axial + lateral - yaw;
-
-            max = Math.max(Math.abs(leftFrontPower), Math.abs(rightFrontPower));
-            max = Math.max(max, Math.abs(leftBackPower));
-            max = Math.max(max, Math.abs(rightBackPower));
-
-            if (max > 1.0) {
-                leftFrontPower  /= max;
-                rightFrontPower /= max;
-                leftBackPower   /= max;
-                rightBackPower  /= max;
-            }
-
+/*
             leftFrontDrive.setPower(leftFrontPower);
             rightFrontDrive.setPower(rightFrontPower);
             leftBackDrive.setPower(leftBackPower);
             rightBackDrive.setPower(rightBackPower);
 
+            if(sensor1.getVoltage()>2 || sensor2.getVoltage()>2) {
+                leftFrontPower=0;
+                rightFrontPower=0;
+                leftBackPower=0;
+                rightFrontPower=0;
+            }
+*/
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
-            telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
+            telemetry.addData("voltage port 2: ", sensor1.getVoltage()*1000);
+            telemetry.addData("voltage port 3: ", sensor2.getVoltage()*1000);
+            telemetry.update();
             telemetry.update();
         }
     }}

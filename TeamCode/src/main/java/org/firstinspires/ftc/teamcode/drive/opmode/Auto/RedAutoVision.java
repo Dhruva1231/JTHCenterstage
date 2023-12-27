@@ -56,11 +56,10 @@ public class RedAutoVision extends LinearOpMode {
 
         Barcode result = scanner.getResult();
 
-
-
         switch (result) {
             case LEFT:
                 telemetry.addData("Detected", "Left");
+
                 break;
             case MIDDLE:
                 telemetry.addData("Detected", "Middle");
