@@ -1,23 +1,23 @@
 package org.firstinspires.ftc.teamcode.drive.opmode.Teleop;
-
-
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.RebuildTeleop.state.barrier;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.RebuildTeleop.state.barrierinter;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.RebuildTeleop.state.base;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.RebuildTeleop.state.cancel;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.RebuildTeleop.state.cancelinter1;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.RebuildTeleop.state.cancelinter2;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.RebuildTeleop.state.deposit;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.RebuildTeleop.state.idle;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.RebuildTeleop.state.initialize;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.RebuildTeleop.state.intake;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.RebuildTeleop.state.intakeinter1;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.RebuildTeleop.state.outtake;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.RebuildTeleop.state.outtakeinter;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.RebuildTeleop.state.outtakepre;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.RebuildTeleop.state.pre;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.RebuildTeleop.state.shoot;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.RebuildTeleop.state.transfer;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.barrier;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.barrierinter;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.base;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.cancel;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.cancelinter1;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.cancelinter2;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.deposit;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.idle;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.initialization1;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.initialization2;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.initialize;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.intake;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.intakeinter1;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.outtake;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.outtakeinter;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.outtakepre;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.pre;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.shoot;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.transfer;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -41,8 +41,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 @Config
-@TeleOp(name="Teleops")
-public class RebuildTeleop extends OpMode {
+@TeleOp(name="New Tleeop 3")
+public class NewTeleop3 extends OpMode {
 
     private IMU imu;
     private double slow = 1.0;
@@ -58,6 +58,11 @@ public class RebuildTeleop extends OpMode {
     private PIDController Lcontroller;
     private PIDController Ocontroller;
 
+    public static double amp1;
+    public static double amp2;
+
+    //right claw grab = 0.5, retract = 0
+    //left claw grab = 0.44, retract = 0.98
 
     public static double Lp = 0.006, Li = 0, Ld = 0.0001;
 
@@ -74,26 +79,26 @@ public class RebuildTeleop extends OpMode {
 
     public DcMotorEx intakeMotor;
 
+
     public static double p = 0.7;
     public static double e = 0.52;
 
-    public static double r = 0.92;
-    public static double v = 0.86;
-    public static double x1 = 0;
-    public static double y1 = 1;
-    public static double z1 = 0.51;
+    public static double wpos = 0.48;
+    public static double ppos = 0.47;
+    public static double tpos = 0.32;
+    public static double c1pos = 0;
+    public static double c2pos = 0.98;
+    public static double apos = 0.51;
 
     public Servo pivotleft;
-
     public Servo pivotright;
-
     public Servo elbowleft;
-
     public Servo elbowright;
-    public Servo pivotOut;
-    public Servo fourbar;
+    public Servo pan;
+    public Servo tilt;
     public Servo wrist;
-    public CRServo lift;
+    public Servo claw1;
+    public Servo claw2;
 
     private int counter = 0;
 
@@ -106,6 +111,8 @@ public class RebuildTeleop extends OpMode {
     private boolean posLockOut = false;
     private boolean posLockInt = false;
     public enum state {
+        initialization1,
+        initialization2,
         cancel,
         cancelinter1,
         cancelinter2,
@@ -131,25 +138,19 @@ public class RebuildTeleop extends OpMode {
 
     public double targetAngleOut = Math.toRadians(90);
     public double targetAngleInt = Math.toRadians(90);
-    public double currentAngle;
 
-    private boolean fortnite = false;
-
-    state New = pre;
+    state New = initialization1;
     ElapsedTime timer  = new ElapsedTime();
     ElapsedTime holdtimer  = new ElapsedTime();
 
-    public Servo outLeft;
-    public Servo outRight;
-    public Servo plane;
-    public AnalogInput distance1;
 
-    public static double pl = 0.5;
+    public CRServo lift;
+    public Servo airplane;
+    public AnalogInput distance1;
     public static double Hp = 0.03;
 
     @Override
     public void init(){
-
 
         // Retrieve the IMU from the hardware map
         imu = hardwareMap.get(IMU.class, "imu");
@@ -195,25 +196,24 @@ public class RebuildTeleop extends OpMode {
         pivotleft = hardwareMap.get(Servo.class, "pl");
         pivotright = hardwareMap.get(Servo.class, "pr");
 
-        pivotOut = hardwareMap.get(Servo.class, "arm1");
-        fourbar = hardwareMap.get(Servo.class, "arm2");
-        wrist = hardwareMap.get(Servo.class, "wrist");
-
-        outRight = hardwareMap.get(Servo.class, "outRight");
-        outLeft = hardwareMap.get(Servo.class, "outLeft");
-        plane = hardwareMap.get(Servo.class, "plane");
+        pan = hardwareMap.get(Servo.class, "0.");
+        wrist = hardwareMap.get(Servo.class, "1.");
+        tilt = hardwareMap.get(Servo.class, "5.");
+        claw1 = hardwareMap.get(Servo.class, "2.");
+        claw2 = hardwareMap.get(Servo.class, "4.");
+        airplane = hardwareMap.get(Servo.class, "3.");
 
         elbowleft.setPosition(0.4);
         elbowright.setPosition(1-0.4);
         pivotleft.setPosition(1-0.7);
         pivotright.setPosition(0.7);
 
-        pivotOut.setPosition(0.92);
-        fourbar.setPosition(0.86);
-        outRight.setPosition(0);
-        outLeft.setPosition(1);
-        wrist.setPosition(0.51);
-        plane.setPosition(0.5);
+        wrist.setPosition(0.48);
+        pan.setPosition(0.47);
+//        tilt.setPosition(0.32);
+        claw1.setPosition(0);
+        claw2.setPosition(0.98);
+        airplane.setPosition(0);
 
     }
 
@@ -302,46 +302,32 @@ public class RebuildTeleop extends OpMode {
         elbowright.setPosition(1-e);
         pivotleft.setPosition(1-p);
         pivotright.setPosition(p);
-        pivotOut.setPosition(r);
-        fourbar.setPosition(v);
-        outRight.setPosition(x1);
-        outLeft.setPosition(y1);
-        wrist.setPosition(z1);
-        plane.setPosition(pl);
 
-        //1 is zero pos
-        //0.75 is outtake
+        pan.setPosition(ppos);
+        tilt.setPosition(tpos);
+        wrist.setPosition(wpos);
+        claw1.setPosition(c1pos);
+        claw2.setPosition(c2pos);
+        airplane.setPosition(apos);
 
-        //y is 1 close
-        //y is 0.3 open
-
-        //x is 0 close
-        //x is 0.7 open
-
-
-
-
-//        From
-//        0.65
-//        0.93
-//        Transfer
-//
-//        0.75 pivot
-//
-//                Then
-//        0.83 elbow
-//
-//        Then 0.12 pivot
-//
-//        Then 0.3 pivot
-//
-//        Then 0.65 elbow
-//
-//        Then 0.93 pivot
-//
-//                Repeat
 
         switch (New) {
+            case initialization1:
+                Otarget = 200;
+                if(Math.abs(outtakeMotor.getCurrentPosition()) > 150){
+                    tpos = 0.32;
+                    timer.reset();
+                    New = initialization2;
+                }
+                break;
+
+            case initialization2:
+                if(timer.seconds() > 0.5){
+                    Otarget = 30;
+                    timer.reset();
+                    New = pre;
+                }
+                break;
             case cancel:
                 if(Ltarget > 100){
                     p = 0.8;
@@ -349,7 +335,7 @@ public class RebuildTeleop extends OpMode {
                     timer.reset();
                     New = cancelinter1;
                 }else{
-                    Otarget = -5;
+                    Otarget = 30;
                     p = 0.8;
                     e = 0.795;
                     timer.reset();
@@ -371,7 +357,7 @@ public class RebuildTeleop extends OpMode {
                     Ltarget = -50;
                 }
                 if(timer.seconds() > 0.75){
-                    Otarget = -5;
+                    Otarget = 30;
                     p = 0.8;
                     e = 0.795;
                     timer.reset();
@@ -381,13 +367,12 @@ public class RebuildTeleop extends OpMode {
 
             case pre:
                 //move to intake
-                Otarget = 20;
+                Otarget = 30;
                 if(counter == 0){
-                    p = 0.3;
+                    p = 0.33;
                 }else{
                     p = 0.135;
                 }
-
                 timer.reset();
                 New = initialize;
                 break;
@@ -432,7 +417,7 @@ public class RebuildTeleop extends OpMode {
                     slow = 1;
                     turnslow = 1;
                     e = 0.65;
-                    Ltarget = -10;
+                    Ltarget = -50;
                 }
 
                 int lstickpos1 = (int) (20 * gamepad2.right_stick_y);
@@ -470,7 +455,7 @@ public class RebuildTeleop extends OpMode {
 
             case intakeinter1:
                 if(timer.seconds() > 0.25){
-                    Ltarget = -15;
+                    Ltarget = -50;
                     timer.reset();
                     New = transfer;
                 }
@@ -517,8 +502,8 @@ public class RebuildTeleop extends OpMode {
                 break;
 
             case barrier:
-                x1 = 0.4;
-                y1 = 0.6;
+                c1pos = 0.5;
+                c2pos = 0.44;
                 if(timer.seconds() > 0.75 && gamepad2.right_bumper){
                     Otarget = 200;
                     timer.reset();
@@ -531,48 +516,45 @@ public class RebuildTeleop extends OpMode {
                 if(gamepad2.right_stick_y != 0){
                     Otarget = Otarget - lstickpos2;
                 }
-                if(timer.seconds() > 0){
-                    r = 0.15;
-                }
-                if(timer.seconds() > 0.2){
-                    v = finalconvert;
+                if(timer.seconds() > 0.1){
+                    tpos = 0.7;
                 }
 
                 if(gamepad1.right_trigger > 0 && gamepad1.left_trigger > 0){
-                    z1 = 0.51;
+                    wpos = 0.48;
 
                 }
                 else if(gamepad1.right_trigger > 0){
-                    z1 = 0.15;
+                    wpos = 0.15;
                 }
                 else if(gamepad1.left_trigger > 0){
-                    z1 = 0.86;
+                    wpos = 0.86;
                 }
 
                 if(gamepad2.right_bumper && timer.seconds() > 1.25){
-                    Otarget = 800;
-                }
-                if(gamepad2.left_bumper && timer.seconds() > 0.5){
                     Otarget = 700;
                 }
-
-                if(gamepad2.right_trigger > 0.1 && timer.seconds() > 0.5){
+                if(gamepad2.left_bumper && timer.seconds() > 0.5){
                     Otarget = 500;
                 }
 
-                if(gamepad2.left_trigger > 0.1 && timer.seconds() > 0.5){
+                if(gamepad2.right_trigger > 0.1 && timer.seconds() > 0.5){
                     Otarget = 350;
                 }
 
+                if(gamepad2.left_trigger > 0.1 && timer.seconds() > 0.5){
+                    Otarget = 200;
+                }
+
                 if(gamepad1.right_bumper && timer.seconds() > 0.5){
-                    p = 0.3;
+                    p = 0.33;
                     left = true;
-                    x1 = 0;
+                    c1pos = 0;
                 }
                 if(gamepad1.left_bumper && timer.seconds() > 0.5){
-                    p = 0.3;
+                    p = 0.33;
                     right = true;
-                    y1 = 1;
+                    c2pos = 0.98;
                 }
                 if(left && right){
                     timer.reset();
@@ -582,27 +564,30 @@ public class RebuildTeleop extends OpMode {
 
             case deposit:
                 if(timer.seconds() > 0.5){
-                    z1 = 0.51;
+                    wpos = 0.48;
                     leftBackPower += -0.3;
                     leftFrontPower += -0.3;
                     rightBackPower += -0.3;
                     rightFrontPower += -0.3;
                 }
 
+                if(timer.seconds()> 0.8){
+                    tpos = 0.32;
+                }
+
                 if(timer.seconds() > 1.25){
-                leftBackPower -= -0.3;
-                leftFrontPower -= -0.3;
-                rightBackPower -= -0.3;
-                rightFrontPower -= -0.3;
-                e = 0.65;
-                left = false;
-                right = false;
-                y1 = 1;
-                x1 = 0;
-                r = 0.92;
-                v = 0.86;
-                timer.reset();
-                New = pre;
+                    leftBackPower -= -0.3;
+                    leftFrontPower -= -0.3;
+                    rightBackPower -= -0.3;
+                    rightFrontPower -= -0.3;
+                    e = 0.65;
+                    left = false;
+                    right = false;
+                    c1pos = 0;
+                    c2pos = 0.98;
+                    tpos = 0.32;
+                    timer.reset();
+                    New = pre;
                 }
                 break;
 
@@ -611,7 +596,7 @@ public class RebuildTeleop extends OpMode {
                     Ltarget = 650;
                 }
                 if(timer.seconds() > 2){
-                    pl = 0.8;
+                    apos = 0.8;
                     timer.reset();
                     New = idle;
                 }

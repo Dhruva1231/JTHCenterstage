@@ -18,14 +18,20 @@ import org.firstinspires.ftc.teamcode.util.Encoder;
  */
 @TeleOp(group = "drive")
 public class LocalizationTest extends LinearOpMode {
+
+    private DcMotorEx leftRear, rightRear, rightFront;
     private Encoder leftEncoder, rightEncoder, frontEncoder;
 
     @Override
     public void runOpMode() throws InterruptedException {
+        leftRear = hardwareMap.get(DcMotorEx.class, "lb");
+        rightRear = hardwareMap.get(DcMotorEx.class, "rf");
+        rightFront = hardwareMap.get(DcMotorEx.class, "rb");
 
         leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "lb"));
         rightEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "rf"));
         frontEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "rb"));
+
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -43,6 +49,7 @@ public class LocalizationTest extends LinearOpMode {
 
             drive.update();
 
+
             Pose2d poseEstimate = drive.getPoseEstimate();
             telemetry.addData("x", poseEstimate.getX());
             telemetry.addData("y", poseEstimate.getY());
@@ -50,6 +57,9 @@ public class LocalizationTest extends LinearOpMode {
             telemetry.addData("left", leftEncoder.getCurrentPosition());
             telemetry.addData("right", rightEncoder.getCurrentPosition());
             telemetry.addData("front", frontEncoder.getCurrentPosition());
+            telemetry.addData("left1", leftRear.getCurrentPosition());
+            telemetry.addData("right1", rightFront.getCurrentPosition());
+            telemetry.addData("front1", rightRear.getCurrentPosition());
             telemetry.update();
         }
     }

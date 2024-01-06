@@ -1,16 +1,22 @@
 package org.firstinspires.ftc.teamcode.drive.opmode.Auto;
 
+import static org.firstinspires.ftc.teamcode.drive.opmode.Auto.Auto.Random.left;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Auto.Auto.Random.middle;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Auto.Auto.Random.right;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Auto.Auto.State.CYCLE1_INTAKE;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Auto.Auto.State.CYCLE1_PRE;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Auto.Auto.State.IDLE;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Auto.Auto.State.PRELOAD_PURPLE;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Auto.Auto.State.PRELOAD_PURPLE_DROP;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Auto.Auto.State.PRELOAD_PURPLE_INTER;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Auto.Auto.State.PRELOAD_YELLOW;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Auto.Auto.State.PRELOAD_YELLOW_DROP;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Auto.Auto.State.PRELOAD_YELLOW_INTER;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
-import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -23,169 +29,90 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
-@Autonomous(group = "Auto")
+@Autonomous(name="Autonomous Program")
 public class Auto extends LinearOpMode {
-    public DcMotorEx intakeLeftExt;
-    public DcMotorEx outtakeMotor;
-    public DcMotorEx intakeRightExt;
-    private PIDController Lcontroller;
-    private PIDController Ocontroller;
-
-    public static double r = 0.9;
-    public static double v = 0.9;
-
-    public static double p = 0.7;
-    public static double e = 0.52;
-
-    public static double x1 = 0.4;
-    public static double y1 = 0.6;
-    public static double z1 = 0.51;
-    public static double Lp = 0.006, Li = 0, Ld = 0.0001;
-
-    //Ltarget Max 750, Min -75
-    public static int Ltarget;
-
-    //Otarget Max 800, Min 25
-    public static int Otarget;
-
-    public static double Op = 0.012, Oi = 0, Od = 0.0002;
-    public static double Of = -0.08;
-    public Servo outLeft;
-    public Servo outRight;
-    public Servo pivotleft;
-
-    public Servo pivotright;
-
-    public Servo elbowleft;
-
-    public Servo elbowright;
-    public Servo pivotOut;
-    public Servo fourbar;
-    public Servo wrist;
-    public CRServo lift;
-
-    private boolean test = false;
-    private ElapsedTime runTime = new ElapsedTime();
-
-
     OpenCvWebcam webcam;
 
-
-    private enum Random {
+    enum Random {
         left,
         middle,
         right
     }
+    Random Random = left;
+    private ElapsedTime runTime = new ElapsedTime();
+    private ElapsedTime timer = new ElapsedTime();
 
-    private DcMotorEx intakeMotor;
-    Random randomization = Random.left;
-
-    // This enum defines our "state"
-    // This is essentially just defines the possible steps our program will take
     enum State {
-        TRAJECTORY_1,   // First, follow a splineTo() trajectory
-        TRAJECTORY_2,   // Then, follow a lineTo() trajectory
-        TURN_1,         // Then we want to do a point turn
-        TRAJECTORY_3,   // Then, we follow another lineTo() trajectory
-        WAIT_1,         // Then we're gonna wait a second
-        TURN_2,         // Finally, we're gonna turn again
-        IDLE,            // Our bot will enter the IDLE state when done
-        AAA,
-        BBB
+        PRELOAD_YELLOW,            // Drop yellow preload on backdrop
+        PRELOAD_YELLOW_INTER,
+        PRELOAD_YELLOW_DROP,           // Drop yellow preload on backdrop
+        PRELOAD_PURPLE,    // Drop purple preload on ground
+        PRELOAD_PURPLE_INTER,    // Drop purple preload on ground
+        PRELOAD_PURPLE_DROP,   // Drop purple preload on ground
+
+        CYCLE1_PRE,        // Move servos into proper position and drive center
+        CYCLE1_INTAKE,     // Extend intake and intake pixels
+        CYCLE1_INTER,      // Start path to backdrop
+        CYCLE1_TRANSFER,   // Retract intake and transfer pixels
+        CYCLE1_DEPOSIT,    // Drop pixels on backdrop
+
+        IDLE,              // Our bot will enter the IDLE state when done
     }
 
-    State currentState = State.IDLE;
+    State state = PRELOAD_YELLOW;
     Pose2d startPose = new Pose2d(0, 0, Math.toRadians(0));
-    Pose2d cyclePose = new Pose2d(0, 0, Math.toRadians(90));
 
     @Override
     public void runOpMode() throws InterruptedException {
-        Lcontroller = new PIDController(Lp,Li,Ld);
-        Ocontroller = new PIDController(Op,Oi,Od);
-
-        intakeMotor = hardwareMap.get(DcMotorEx.class, "intake");
-
-
-        intakeLeftExt = hardwareMap.get(DcMotorEx.class, "lint");
-        intakeRightExt = hardwareMap.get(DcMotorEx.class, "rint");
-        outtakeMotor = hardwareMap.get(DcMotorEx.class, "out");
-
-        outtakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        intakeLeftExt.setDirection(DcMotorSimple.Direction.REVERSE);
-        intakeRightExt.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        elbowleft = hardwareMap.get(Servo.class, "el");
-        elbowright = hardwareMap.get(Servo.class, "er");
-        pivotleft = hardwareMap.get(Servo.class, "pl");
-        pivotright = hardwareMap.get(Servo.class, "pr");
-        pivotOut = hardwareMap.get(Servo.class, "arm1");
-        fourbar = hardwareMap.get(Servo.class, "arm2");
-        wrist = hardwareMap.get(Servo.class, "wrist");
-
-        outRight = hardwareMap.get(Servo.class, "outRight");
-        outLeft = hardwareMap.get(Servo.class, "outLeft");
-
-        ElapsedTime timer  = new ElapsedTime();
-
-        elbowleft.setPosition(0.4);
-        elbowright.setPosition(1-0.4);
-        pivotleft.setPosition(1-0.7);
-        pivotright.setPosition(0.7);
-        pivotOut.setPosition(0.9);
-        fourbar.setPosition(0.9);
-        outRight.setPosition(0.4);
-        outLeft.setPosition(0.6);
-        wrist.setPosition(0.51);
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
-        // Set inital pose
         drive.setPoseEstimate(startPose);
 
-        // Let's define our trajectories
-        TrajectorySequence trajectory1 = drive.trajectorySequenceBuilder(startPose)
-                .lineToLinearHeading(new Pose2d(15, 0, Math.toRadians(0)))
+        TrajectorySequence preload1 = drive.trajectorySequenceBuilder(startPose)
+                .setReversed(true)
+                .splineTo(new Vector2d(-5, 0), Math.toRadians(180))
+                .splineTo(new Vector2d(-27, -36), Math.toRadians(-90))
                 .build();
 
-        TrajectorySequence trajectoryright = drive.trajectorySequenceBuilder(trajectory1.end())
-                .turn(Math.toRadians(-48))
-                .waitSeconds(7)
-                .turn(Math.toRadians(144))
+        TrajectorySequence preload2_v1 = drive.trajectorySequenceBuilder(preload1.end())
+                .lineTo(new Vector2d(-33, -36))
                 .build();
 
-        TrajectorySequence trajectoryleft = drive.trajectorySequenceBuilder(trajectory1.end())
-                .turn(Math.toRadians(38))
-                .turn(Math.toRadians(58))
+        TrajectorySequence preload2_v2 = drive.trajectorySequenceBuilder(preload1.end())
+                .setReversed(false)
+                .splineToLinearHeading(new Pose2d(-50.5, -10, Math.toRadians(45)), Math.toRadians(90))
                 .build();
 
-        TrajectorySequence trajectorymid = drive.trajectorySequenceBuilder(trajectory1.end())
-                .forward(7)
-                .waitSeconds(1)
-                .back(7)
-                .waitSeconds(7)
-                .turn(Math.toRadians(58))
-                .turn(Math.toRadians(38))
+        TrajectorySequence cycle1_v1 = drive.trajectorySequenceBuilder(preload2_v1.end())
+                .setReversed(false)
+                .splineTo(new Vector2d(-50.5, -10), Math.toRadians(90))
+                .splineTo(new Vector2d(-50.5, 30), Math.toRadians(90))
                 .build();
 
-        TrajectorySequence trajectory3 = drive.trajectorySequenceBuilder(cyclePose)
-                .back(38)
-                .waitSeconds(0.5)
-                .back(2)
+        TrajectorySequence cycle1_v2 = drive.trajectorySequenceBuilder(preload2_v2.end())
+                .setReversed(false)
+                .lineToSplineHeading(new Pose2d(-51.5, -8, Math.toRadians(90)))
+                .splineTo(new Vector2d(-51.5, 30), Math.toRadians(90))
                 .build();
 
-        TrajectorySequence trajectory4 = drive.trajectorySequenceBuilder(cyclePose)
-                .lineToConstantHeading(new Vector2d(0, -35))
-                .waitSeconds(0.5)
-                .lineToConstantHeading(new Vector2d(0, 20))
-                .waitSeconds(0.5)
-                .lineToConstantHeading(new Vector2d(0, -35))
+        TrajectorySequence deposit_v1 = drive.trajectorySequenceBuilder(cycle1_v1.end())
+                .setReversed(true)
+                .waitSeconds(0.25)
+                .splineTo(new Vector2d(-50.5, 10), Math.toRadians(-90))
+                .splineTo(new Vector2d(-27, -36), Math.toRadians(-90))
                 .build();
 
-        // Define the angle to turn at
+        TrajectorySequence deposit_v2 = drive.trajectorySequenceBuilder(cycle1_v2.end())
+                .setReversed(true)
+                .waitSeconds(0.25)
+                .splineTo(new Vector2d(-50.5, 10), Math.toRadians(-90))
+                .splineTo(new Vector2d(-27, -36), Math.toRadians(-90))
+                .build();
+
         telemetry.addData("Status", "Initialized");
         telemetry.addData("Status", "Run Time: " + runTime.toString());
         telemetry.update();
-
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
@@ -208,12 +135,10 @@ public class Auto extends LinearOpMode {
             }
         });
 
+        telemetry.setMsTransmissionInterval(50);
+
         waitForStart();
-
-        runTime.reset();
-
         Barcode result = scanner.getResult();
-
         switch (result) {
             case LEFT:
                 telemetry.addData("Detected", "Left");
@@ -225,171 +150,88 @@ public class Auto extends LinearOpMode {
                 telemetry.addData("Detected", "Right");
                 break;
         }
+
+        runTime.reset();
+
         if (isStopRequested()) return;
 
-        // Set the current state to TRAJECTORY_1, our first step
-        // Then have it follow that trajectory
-        // Make sure you use the async version of the commands
-        // Otherwise it will be blocking and pause the program here until the trajectory finishes
-        currentState = State.TRAJECTORY_1;
+        state = PRELOAD_YELLOW;
+        timer.reset();
 
         while (opModeIsActive() && !isStopRequested()) {
-            // Our state machine logic
-            // You can have multiple switch statements running together for multiple state machines
-            // in parallel. This is the basic idea for subsystems and commands.
-
-            // We essentially define the flow of the state machine through this switch statement
-            switch (currentState) {
-                case TRAJECTORY_1:
-                    intakeMotor.setPower(-0.2);
-                    p = 0.1;
-                    Ltarget = 600;
+            switch(state){
+                case PRELOAD_YELLOW:
+                    drive.followTrajectorySequenceAsync(preload1);
                     timer.reset();
-                    currentState = State.TRAJECTORY_2;
+                    state = PRELOAD_YELLOW_INTER;
                     break;
-                case TRAJECTORY_2:
-                    if(timer.seconds() > 0.25){
-                        e = 0.75;
-                    }
-                    if (!drive.isBusy()) {
-                        e = 0.75;
+
+                case PRELOAD_YELLOW_INTER:
+                    //Move intake servos perpendicular to the ground
+                    //Move deposit out and deposit slides up
+                    if(!drive.isBusy()){
                         timer.reset();
-                        currentState = State.AAA;
-                        timer.reset();
+                        state = PRELOAD_YELLOW_DROP;
                     }
                     break;
 
-                case TURN_1:
-                    if(result == Barcode.LEFT){
-                        drive.followTrajectorySequenceAsync(trajectoryleft);
-                    }
-                    else if(result == Barcode.RIGHT){
-                        drive.followTrajectorySequenceAsync(trajectoryright);
-                    }
-                    else if(result == Barcode.MIDDLE){
-                        drive.followTrajectorySequenceAsync(trajectorymid);
-                    }
-                    timer.reset();
-                    currentState = State.TRAJECTORY_3;
-                    break;
-                case TRAJECTORY_3:
-                    if(timer.seconds() > 4){
-                        x1 = 0;
-                    }
-                    if(timer.seconds() > 5){
-                    if (!drive.isBusy()) {
-                        r = 0.08;
-                        drive.setPoseEstimate(cyclePose);
-                        currentState = State.AAA;
-                        // Start the wait timer once we switch to the next state
-                        // This is so we can track how long we've been in the WAIT_1 state
-                    }
-                    }
-                    break;
-                case WAIT_1:
-                    drive.followTrajectorySequenceAsync(trajectory3);
-                    // Check if the timer has exceeded the specified wait time
-                    // If so, move on to the TURN_2 state
-                    timer.reset();
-                    currentState = State.TURN_2;
-                    break;
-                case TURN_2:
-                    // Check if the drive class is busy turning
-                    // If not, move onto the next state, IDLE
-                    // We are done with the program
-                    if (timer.seconds() > 4) {
-                        timer.reset();
-                        y1 = 1;
-                        currentState = State.IDLE;
-                    }
-                    break;
-                case IDLE:
-                    if(timer.seconds() > 1){
-                    r = 0.9;
-                    v = 0.9;
-                    currentState = State.AAA;
-                    }
-                    // Do nothing in IDLE
-                    // currentState does not change once in IDLE
-                    // This concludes the autonomous program
+                case PRELOAD_YELLOW_DROP:
+                    //Drop pixel
+                    state = PRELOAD_PURPLE;
                     break;
 
-                case AAA:
-                    if(timer.seconds() > 5){
-                        intakeMotor.setPower(1);
+                case PRELOAD_PURPLE:
+                    if(result == Barcode.LEFT || result == Barcode.RIGHT){
+                        drive.followTrajectorySequenceAsync(preload2_v1);
+                        state = PRELOAD_PURPLE_INTER;
                     }
-                    else if(timer.seconds() > 8) {
-                        intakeMotor.setPower(0);
+                    if(result == Barcode.MIDDLE){
+                        drive.followTrajectorySequenceAsync(preload2_v2);
+                        state = PRELOAD_PURPLE_INTER;
                     }
                     break;
-            }
 
-            Lcontroller.setPID(Lp, Li, Ld);
+                case PRELOAD_PURPLE_INTER:
+                    if(!drive.isBusy()){
+                        state = PRELOAD_PURPLE_DROP;
+                    }
+                    break;
 
-            int armPos = intakeLeftExt.getCurrentPosition();
+                case PRELOAD_PURPLE_DROP:
+                    if(result == Barcode.LEFT || result == Barcode.RIGHT){
+                        //extend intake
+                        //move intake servos
+                        //"spit" out purple pixel
+                        state = CYCLE1_PRE;
+                    }
 
-            double Lpid = Lcontroller.calculate(armPos, Ltarget);
+                    if(result == Barcode.MIDDLE){
+                        //move intake servos
+                        //"spit" out purple pixel
+                        state = CYCLE1_PRE;
+                    }
+                    break;
 
-            double Lpower = Lpid;
+                case CYCLE1_PRE:
+                    if(result == Barcode.LEFT || result == Barcode.RIGHT){
+                        drive.followTrajectorySequenceAsync(cycle1_v1);
+                        state = CYCLE1_INTAKE;
+                    }
+                    if(result == Barcode.MIDDLE){
+                        drive.followTrajectorySequenceAsync(cycle1_v2);
+                        state = CYCLE1_INTAKE;
+                    }
+                    break;
 
-            intakeLeftExt.setPower(Lpower);
-            intakeRightExt.setPower(Lpower);
-
-            Ocontroller.setPID(Op, Oi, Od);
-
-            int outPos = outtakeMotor.getCurrentPosition();
-
-            double Opid = Ocontroller.calculate(outPos, -Otarget);
-            double Off = Of;
+                case CYCLE1_INTAKE:
+                    //
+                    break;
 
 
-            double Opower = Opid + Off;
+                }
 
-            outtakeMotor.setPower(Opower);
-
-            elbowleft.setPosition(e);
-            elbowright.setPosition(1-e);
-            pivotleft.setPosition(1-p);
-            pivotright.setPosition(p);
-            pivotOut.setPosition(r);
-            fourbar.setPosition(v);
-            outRight.setPosition(x1);
-            outLeft.setPosition(y1);
-            wrist.setPosition(z1);
-
-            // Anything outside of the switch statement will run independent of the currentState
-
-            // We update drive continuously in the background, regardless of state
             drive.update();
-            // We update our lift PID continuously in the background, regardless of state
 
-            // Read pose
-            Pose2d poseEstimate = drive.getPoseEstimate();
-
-            // Continually write pose to `PoseStorage`
-
-            // Print pose to telemetry
-            telemetry.addData("x", poseEstimate.getX());
-            telemetry.addData("y", poseEstimate.getY());
-            telemetry.addData("heading", poseEstimate.getHeading());
-            telemetry.update();
+            }
         }
-
-
-    }
-
-    // Assume we have a hardware class called lift
-    // Lift uses a PID controller to maintain its height
-    // Thus, update() must be called in a loop
-    class Lift {
-        public Lift(HardwareMap hardwareMap) {
-            // Beep boop this is the the constructor for the lift
-            // Assume this sets up the lift hardware
-        }
-
-        public void update() {
-            // Beep boop this is the lift update function
-            // Assume this runs some PID controller for the lift
-        }
-    }
 }
