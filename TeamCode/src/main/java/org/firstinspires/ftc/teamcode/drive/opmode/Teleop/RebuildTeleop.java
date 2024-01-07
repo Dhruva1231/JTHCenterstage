@@ -49,6 +49,7 @@ public class RebuildTeleop extends OpMode {
     private double turnslow = 1.0;
     private double progSlowmode = 1.0;
 
+    public static double intakePower;
     private boolean left = false;
     private boolean right = false;
     boolean onOff = false;
@@ -308,6 +309,7 @@ public class RebuildTeleop extends OpMode {
         outLeft.setPosition(y1);
         wrist.setPosition(z1);
         plane.setPosition(pl);
+        intakeMotor.setPower(intakePower);
 
         //1 is zero pos
         //0.75 is outtake
@@ -345,7 +347,8 @@ public class RebuildTeleop extends OpMode {
             case cancel:
                 if(Ltarget > 100){
                     p = 0.8;
-                    intakeMotor.setPower(0.2);
+//                    intakeMotor.setPower(0.2);
+                    intakePower = 0.2;
                     timer.reset();
                     New = cancelinter1;
                 }else{
@@ -445,16 +448,19 @@ public class RebuildTeleop extends OpMode {
                     holdtimer.reset();
                     onOff = true;
                     e = 0.6;
-                    intakeMotor.setPower(-1);
+//                    intakeMotor.setPower(-1);
+                    intakePower = -1;
                 }else if(gamepad1.right_bumper && onOff && holdtimer.seconds() > 0.25 && !(intakeLeftExt.getVelocity() > 25)){
                     holdtimer.reset();
                     onOff = false;
-                    intakeMotor.setPower(0);
+//                    intakeMotor.setPower(0);
+                    intakePower = 0;
                     e = 0.65;
                 }else if(gamepad1.left_bumper){
                     holdtimer.reset();
                     onOff = false;
-                    intakeMotor.setPower(1);
+//                    intakeMotor.setPower(1);
+                    intakePower = 1;
                 }
 
                 if(gamepad2.dpad_up || gamepad1.dpad_up){
@@ -462,7 +468,8 @@ public class RebuildTeleop extends OpMode {
                     turnslow = 1;
                     e = 0.795;
                     p = 0.8;
-                    intakeMotor.setPower(-0.5);
+//                    intakeMotor.setPower(-0.5);
+                    intakePower = -0.5;
                     timer.reset();
                     New = intakeinter1;
                 }
@@ -484,7 +491,8 @@ public class RebuildTeleop extends OpMode {
                 }
 
                 if(timer.seconds() > 0.35 && intakeLeftExt.getCurrentPosition() < 25){
-                    intakeMotor.setPower(0);
+//                    intakeMotor.setPower(0);
+                    intakePower = 0;
                     p = 0.8;
                     timer.reset();
                     New = outtake;
@@ -499,7 +507,8 @@ public class RebuildTeleop extends OpMode {
                 break;
 
             case outtakepre:
-                intakeMotor.setPower(1);
+//                intakeMotor.setPower(1);
+                intakePower = 1;
 //                intakeMotor.setPower((Math.pow((timer.seconds()), 2) * 1.25));
                 if(timer.seconds() > 1.25){
                     timer.reset();
@@ -510,7 +519,8 @@ public class RebuildTeleop extends OpMode {
             case outtakeinter:
                 if(timer.seconds() > 0.25){
                     Otarget = -50;
-                    intakeMotor.setPower(0);
+                    intakePower = 0;
+//                    intakeMotor.setPower(0);
                     timer.reset();
                     New = barrier;
                 }

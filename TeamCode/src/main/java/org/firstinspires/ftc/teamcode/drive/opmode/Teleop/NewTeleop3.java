@@ -23,6 +23,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.controller.PIDController;
+import com.qualcomm.hardware.lynx.commands.core.LynxGetMotorTargetVelocityCommand;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -41,7 +42,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 @Config
-@TeleOp(name="New Tleeop 3")
+@TeleOp(name="Teleop 3")
 public class NewTeleop3 extends OpMode {
 
     private IMU imu;
@@ -52,18 +53,20 @@ public class NewTeleop3 extends OpMode {
     private boolean left = false;
     private boolean right = false;
     boolean onOff = false;
+    boolean onOff2 = false;
     public DcMotorEx intakeLeftExt;
     public DcMotorEx outtakeMotor;
     public DcMotorEx intakeRightExt;
     private PIDController Lcontroller;
     private PIDController Ocontroller;
 
-    public static double amp1;
+    public static double intakePower;
+
+    public static double amp1;:
     public static double amp2;
 
     //right claw grab = 0.5, retract = 0
     //left claw grab = 0.44, retract = 0.98
-
     public static double Lp = 0.006, Li = 0, Ld = 0.0001;
 
     public static double Lf;
@@ -89,6 +92,7 @@ public class NewTeleop3 extends OpMode {
     public static double c1pos = 0;
     public static double c2pos = 0.98;
     public static double apos = 0.51;
+    public static double pposadd = 0.468;
 
     public Servo pivotleft;
     public Servo pivotright;
@@ -142,6 +146,7 @@ public class NewTeleop3 extends OpMode {
     state New = initialization1;
     ElapsedTime timer  = new ElapsedTime();
     ElapsedTime holdtimer  = new ElapsedTime();
+    ElapsedTime holdtimer2  = new ElapsedTime();
 
 
     public CRServo lift;
@@ -210,10 +215,9 @@ public class NewTeleop3 extends OpMode {
 
         wrist.setPosition(0.48);
         pan.setPosition(0.47);
-//        tilt.setPosition(0.32);
         claw1.setPosition(0);
         claw2.setPosition(0.98);
-        airplane.setPosition(0);
+        airplane.setPosition(0.5);
 
     }
 
@@ -251,6 +255,7 @@ public class NewTeleop3 extends OpMode {
         }
 
         double currentHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        double angle = Math.toDegrees(currentHeading);
         double modifiedHeading = modify(Math.toDegrees(currentHeading));
 
         double errorOut =  modifiedHeading - Math.toDegrees(targetAngleOut);
@@ -309,6 +314,7 @@ public class NewTeleop3 extends OpMode {
         claw1.setPosition(c1pos);
         claw2.setPosition(c2pos);
         airplane.setPosition(apos);
+        intakeMotor.setPower(intakePower);
 
 
         switch (New) {
@@ -331,7 +337,8 @@ public class NewTeleop3 extends OpMode {
             case cancel:
                 if(Ltarget > 100){
                     p = 0.8;
-                    intakeMotor.setPower(0.2);
+                    intakePower = 0.2;
+//                    intakeMotor.setPower(0.2);
                     timer.reset();
                     New = cancelinter1;
                 }else{
@@ -388,38 +395,39 @@ public class NewTeleop3 extends OpMode {
             case base:
                 //move pivot to intake
                 if(timer.seconds() > 0.15){
-                    p = 0.135;
+                    p = 0.14;
                     timer.reset();
                     New = intake;
                 }
                 break;
 
             case intake:
+                if(gamepad1.right_trigger > 0 && !onOff2 && holdtimer2.seconds() > 0.5){
+                    holdtimer2.reset();
+                    onOff2 = true;
+                    Ltarget = 600;
+                }else if(gamepad1.right_trigger > 0 && onOff2 && holdtimer2.seconds() > 0.5){
+                    holdtimer2.reset();
+                    onOff2 = false;
+                    Ltarget = 0;
+                }
+
                 if(gamepad2.right_bumper){
-                    slow = 0.5;
-                    turnslow = 0.3;
                     e = 0.65;
                     Ltarget = 975;
                 }
-                if(gamepad2.left_bumper){
-                    slow = 0.5;
-                    turnslow = 0.3;
+                if(gamepad2.left_bumper ){
                     e = 0.65;
-                    Ltarget = 700;
+                    Ltarget = 600;
                 }
                 if(gamepad2.right_trigger > 0.2){
-                    slow = 0.75;
-                    turnslow = 0.5;
                     e = 0.65;
                     Ltarget = 400;
                 }
                 if(gamepad2.left_trigger > 0.2){
-                    slow = 1;
-                    turnslow = 1;
                     e = 0.65;
                     Ltarget = -50;
                 }
-
                 int lstickpos1 = (int) (20 * gamepad2.right_stick_y);
 
                 if(gamepad2.right_stick_y != 0){
@@ -430,16 +438,17 @@ public class NewTeleop3 extends OpMode {
                     holdtimer.reset();
                     onOff = true;
                     e = 0.6;
-                    intakeMotor.setPower(-1);
+                    intakePower = -1;
                 }else if(gamepad1.right_bumper && onOff && holdtimer.seconds() > 0.25 && !(intakeLeftExt.getVelocity() > 25)){
                     holdtimer.reset();
                     onOff = false;
-                    intakeMotor.setPower(0);
+                    intakePower = 0;
                     e = 0.65;
                 }else if(gamepad1.left_bumper){
                     holdtimer.reset();
                     onOff = false;
-                    intakeMotor.setPower(1);
+//                    intakeMotor.setPower(1);
+                    intakePower = 1;
                 }
 
                 if(gamepad2.dpad_up || gamepad1.dpad_up){
@@ -447,7 +456,8 @@ public class NewTeleop3 extends OpMode {
                     turnslow = 1;
                     e = 0.795;
                     p = 0.8;
-                    intakeMotor.setPower(-0.5);
+//                    intakeMotor.setPower(-0.5);
+                    intakePower = -0.5;
                     timer.reset();
                     New = intakeinter1;
                 }
@@ -469,7 +479,7 @@ public class NewTeleop3 extends OpMode {
                 }
 
                 if(timer.seconds() > 0.35 && intakeLeftExt.getCurrentPosition() < 25){
-                    intakeMotor.setPower(0);
+                    intakePower = 0;
                     p = 0.8;
                     timer.reset();
                     New = outtake;
@@ -484,7 +494,8 @@ public class NewTeleop3 extends OpMode {
                 break;
 
             case outtakepre:
-                intakeMotor.setPower(1);
+//                intakeMotor.setPower(1);
+                intakePower = 1;
 //                intakeMotor.setPower((Math.pow((timer.seconds()), 2) * 1.25));
                 if(timer.seconds() > 1.25){
                     timer.reset();
@@ -495,16 +506,19 @@ public class NewTeleop3 extends OpMode {
             case outtakeinter:
                 if(timer.seconds() > 0.25){
                     Otarget = -50;
-                    intakeMotor.setPower(0);
+//                    intakeMotor.setPower(0);
+                    intakePower = 0;
                     timer.reset();
                     New = barrier;
                 }
                 break;
 
             case barrier:
-                c1pos = 0.5;
-                c2pos = 0.44;
-                if(timer.seconds() > 0.75 && gamepad2.right_bumper){
+                if(timer.seconds() > 0.75){
+                    c1pos = 0.5;
+                    c2pos = 0.44;
+                }
+                if(timer.seconds() > 1.25 && (gamepad2.right_bumper || gamepad1.right_bumper)){
                     Otarget = 200;
                     timer.reset();
                     New = barrierinter;
@@ -517,7 +531,7 @@ public class NewTeleop3 extends OpMode {
                     Otarget = Otarget - lstickpos2;
                 }
                 if(timer.seconds() > 0.1){
-                    tpos = 0.7;
+                    tpos = 0.68;
                 }
 
                 if(gamepad1.right_trigger > 0 && gamepad1.left_trigger > 0){
@@ -560,10 +574,14 @@ public class NewTeleop3 extends OpMode {
                     timer.reset();
                     New = deposit;
                 }
+
+                ppos = Range.clip(-0.00603*(angle)+pposadd, 0.22, 0.72);
+
                 break;
 
             case deposit:
                 if(timer.seconds() > 0.5){
+                    tpos= 0.32;
                     wpos = 0.48;
                     leftBackPower += -0.3;
                     leftFrontPower += -0.3;
@@ -572,6 +590,7 @@ public class NewTeleop3 extends OpMode {
                 }
 
                 if(timer.seconds()> 0.8){
+                    ppos = 0.47;
                     tpos = 0.32;
                 }
 
@@ -592,13 +611,11 @@ public class NewTeleop3 extends OpMode {
                 break;
 
             case shoot:
-                if(timer.seconds() > 0.5){
-                    Ltarget = 650;
-                }
-                if(timer.seconds() > 2){
+                if(gamepad2.right_bumper){
                     apos = 0.8;
-                    timer.reset();
-                    New = idle;
+                }
+                if(gamepad2.left_bumper){
+                    apos = 0.5;
                 }
                 break;
 
