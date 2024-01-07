@@ -148,7 +148,7 @@ public class ScrimmageTwoPersonTeleop extends OpMode {
         Ocontroller = new PIDController(Op,Oi,Od);
 
         intakeLeftExt = hardwareMap.get(DcMotorEx.class, "lint");
-        outtakeMotor = hardwareMap.get(DcMotorEx.class, "outtake");
+        outtakeMotor = hardwareMap.get(DcMotorEx.class, "out");
         intakeRightExt = hardwareMap.get(DcMotorEx.class, "rint");
 
         outtakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);

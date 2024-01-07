@@ -18,9 +18,9 @@ public class RedScanner extends OpenCvPipeline {
     Mat rightMat = new Mat();
 
     // 320 x 240 Resolution
-    Rect leftROI = new Rect(new Point(0, 0), new Point(320 / 3.0, 240));
-    Rect midROI = new Rect(new Point(320 / 3.0, 0), new Point(2 * 320 / 3.0, 240));
-    Rect rightROI = new Rect(new Point(2 * 320 / 3.0, 0), new Point(320, 240));
+    Rect leftROI = new Rect(new Point(0, 200), new Point(1280 / 4.0, 380));
+    Rect midROI = new Rect(new Point(1280 / 4.0, 200), new Point(2.5 * 1280 / 3.0, 380));
+    Rect rightROI = new Rect(new Point(2.5 * 1280 / 3.0, 200), new Point(1280, 380));
 
     private Barcode result = null;
     private Telemetry telemetry;
