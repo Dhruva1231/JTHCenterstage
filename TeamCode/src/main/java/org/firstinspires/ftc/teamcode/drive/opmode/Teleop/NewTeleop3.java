@@ -1,23 +1,23 @@
 package org.firstinspires.ftc.teamcode.drive.opmode.Teleop;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.barrier;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.barrierinter;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.base;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.cancel;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.cancelinter1;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.cancelinter2;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.deposit;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.idle;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.initialization1;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.initialization2;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.initialize;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.intake;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.intakeinter1;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.outtake;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.outtakeinter;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.outtakepre;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.pre;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.shoot;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.transfer;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.STATE.barrier;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.STATE.barrierinter;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.STATE.base;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.STATE.cancel;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.STATE.cancelinter1;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.STATE.cancelinter2;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.STATE.deposit;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.STATE.idle;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.STATE.initialization1;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.STATE.initialization2;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.STATE.initialize;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.STATE.intake;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.STATE.intakeinter1;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.STATE.outtake;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.STATE.outtakeinter;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.STATE.outtakepre;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.STATE.pre;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.STATE.shoot;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.STATE.transfer;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -38,12 +38,10 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 @Config
-@TeleOp(name="New Tleeop 3")
+@TeleOp(name="New Teleop 3")
 public class NewTeleop3 extends OpMode {
-
     private IMU imu;
     private double slow = 1.0;
     private double turnslow = 1.0;
@@ -74,8 +72,8 @@ public class NewTeleop3 extends OpMode {
     //Otarget Max 800, Min 25
     public static int Otarget;
 
-    public static double Op = 0.012, Oi = 0, Od = 0.0002;
-    public static double Of = -0.08;
+    public static double Op = 0.009, Oi = 0, Od = 0.0004;
+    public static double Of = -0.17;
 
     public DcMotorEx intakeMotor;
 
@@ -110,7 +108,7 @@ public class NewTeleop3 extends OpMode {
 
     private boolean posLockOut = false;
     private boolean posLockInt = false;
-    public enum state {
+    public enum STATE {
         initialization1,
         initialization2,
         cancel,
@@ -139,10 +137,9 @@ public class NewTeleop3 extends OpMode {
     public double targetAngleOut = Math.toRadians(90);
     public double targetAngleInt = Math.toRadians(90);
 
-    state New = initialization1;
+    STATE New = initialization1;
     ElapsedTime timer  = new ElapsedTime();
     ElapsedTime holdtimer  = new ElapsedTime();
-
 
     public CRServo lift;
     public Servo airplane;
@@ -225,8 +222,6 @@ public class NewTeleop3 extends OpMode {
 
     @Override
     public void loop(){
-
-
         double max;
         double axial   = -gamepad1.left_stick_y * slow * progSlowmode;
         double lateral =  gamepad1.left_stick_x * slow * progSlowmode * 1.4;
@@ -281,7 +276,6 @@ public class NewTeleop3 extends OpMode {
         telemetry.addData("currentheading", Math.toDegrees(currentHeading));
         telemetry.addData("error", errorOut);
 
-
         leftFrontDrive.setPower(leftFrontPower);
         rightFrontDrive.setPower(rightFrontPower);
         leftBackDrive.setPower(leftBackPower);
@@ -302,7 +296,6 @@ public class NewTeleop3 extends OpMode {
         elbowright.setPosition(1-e);
         pivotleft.setPosition(1-p);
         pivotright.setPosition(p);
-
         pan.setPosition(ppos);
         tilt.setPosition(tpos);
         wrist.setPosition(wpos);
@@ -328,6 +321,7 @@ public class NewTeleop3 extends OpMode {
                     New = pre;
                 }
                 break;
+
             case cancel:
                 if(Ltarget > 100){
                     p = 0.8;
@@ -341,7 +335,6 @@ public class NewTeleop3 extends OpMode {
                     timer.reset();
                     New = base;
                 }
-
                 break;
 
             case cancelinter1:
