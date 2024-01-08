@@ -62,7 +62,7 @@ public class NewTeleop3 extends OpMode {
 
     public static double intakePower;
 
-    public static double amp1;:
+    public static double amp1;
     public static double amp2;
 
     //right claw grab = 0.5, retract = 0
