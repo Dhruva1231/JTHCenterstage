@@ -77,8 +77,8 @@ public class NewTeleop3 extends OpMode {
     //Otarget Max 800, Min 25
     public static int Otarget;
 
-    public static double Op = 0.012, Oi = 0, Od = 0.0002;
-    public static double Of = -0.08;
+    public static double Op = 0.009, Oi = 0, Od = 0.0004;
+    public static double Of = -0.17;
 
     public DcMotorEx intakeMotor;
 
