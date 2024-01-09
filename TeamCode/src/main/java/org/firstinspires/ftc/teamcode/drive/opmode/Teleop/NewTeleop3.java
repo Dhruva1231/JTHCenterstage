@@ -329,7 +329,7 @@ public class NewTeleop3 extends OpMode {
 
             case initialization2:
                 if(timer.seconds() > 0.5){
-                    Otarget = 0;
+                    Otarget = 30;
                     timer.reset();
                     New = pre;
                 }
@@ -342,7 +342,7 @@ public class NewTeleop3 extends OpMode {
                     timer.reset();
                     New = cancelinter1;
                 }else{
-                    Otarget = 0;
+                    Otarget = 30;
                     p = 0.8;
                     e = 0.795;
                     timer.reset();
@@ -364,7 +364,7 @@ public class NewTeleop3 extends OpMode {
                     Ltarget = -50;
                 }
                 if(timer.seconds() > 0.75){
-                    Otarget = 0;
+                    Otarget = 30;
                     p = 0.8;
                     e = 0.795;
                     timer.reset();
@@ -374,7 +374,7 @@ public class NewTeleop3 extends OpMode {
 
             case pre:
                 //move to intake
-                Otarget = 0;
+                Otarget = 30;
                 if(counter == 0){
                     p = 0.33;
                 }else{
