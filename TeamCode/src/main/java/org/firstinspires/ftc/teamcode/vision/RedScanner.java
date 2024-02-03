@@ -19,8 +19,8 @@ public class RedScanner extends OpenCvPipeline {
 
     // 320 x 240 Resolution
     Rect leftROI = new Rect(new Point(0, 200), new Point(1280 / 4.0, 380));
-    Rect midROI = new Rect(new Point(1280 / 4.0, 200), new Point(2.5 * 1280 / 3.0, 380));
-    Rect rightROI = new Rect(new Point(2.5 * 1280 / 3.0, 200), new Point(1280, 380));
+    Rect midROI = new Rect(new Point(1280 / 4.0, 200), new Point(3 * 1280 / 4.0, 380));
+    Rect rightROI = new Rect(new Point(3 * 1280 / 4.0, 200), new Point(1280, 380));
 
     private Barcode result = null;
     private Telemetry telemetry;
@@ -58,21 +58,21 @@ public class RedScanner extends OpenCvPipeline {
         Scalar matchColor = new Scalar(0, 255, 0);
         Scalar mismatchColor = new Scalar(255, 0, 0);
 
-        if (maxValue == leftValue) {
+        if (leftValue>200000) {
             result = Barcode.LEFT;
             Imgproc.rectangle(input, leftROI, matchColor);
             Imgproc.rectangle(input, midROI, mismatchColor);
             Imgproc.rectangle(input, rightROI, mismatchColor);
-        } else if (maxValue == midValue) {
-            result = Barcode.MIDDLE;
-            Imgproc.rectangle(input, leftROI, mismatchColor);
-            Imgproc.rectangle(input, midROI, matchColor);
-            Imgproc.rectangle(input, rightROI, mismatchColor);
-        } else {
+        } else if (rightValue>200000) {
             result = Barcode.RIGHT;
             Imgproc.rectangle(input, leftROI, mismatchColor);
             Imgproc.rectangle(input, midROI, mismatchColor);
             Imgproc.rectangle(input, rightROI, matchColor);
+        } else {
+            result = Barcode.MIDDLE;
+            Imgproc.rectangle(input, leftROI, mismatchColor);
+            Imgproc.rectangle(input, midROI, matchColor);
+            Imgproc.rectangle(input, rightROI, mismatchColor);
         }
 
         telemetry.addData("Barcode", result.toString().toLowerCase());

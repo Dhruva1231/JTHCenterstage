@@ -1,28 +1,28 @@
 package org.firstinspires.ftc.teamcode.drive.opmode.Teleop;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.stackpos.bottom;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.stackpos.normal;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.stackpos.top;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.barrier;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.barrierinter;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.barrierpreinter;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.base;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.cancel;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.cancelinter1;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.cancelinter2;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.deposit;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.idle;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.initialization1;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.initialization2;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.initialize;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.intake;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.intakeinter1;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.outtake;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.outtakeinter;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.outtakepre;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.pre;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.redo;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.shoot;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3.state.transfer;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3red.stackpos.bottom;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3red.stackpos.normal;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3red.stackpos.top;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3red.state.barrier;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3red.state.barrierinter;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3red.state.barrierpreinter;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3red.state.base;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3red.state.cancel;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3red.state.cancelinter1;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3red.state.cancelinter2;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3red.state.deposit;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3red.state.idle;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3red.state.initialization1;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3red.state.initialization2;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3red.state.initialize;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3red.state.intake;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3red.state.intakeinter1;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3red.state.outtake;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3red.state.outtakeinter;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3red.state.outtakepre;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3red.state.pre;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3red.state.redo;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3red.state.shoot;
+import static org.firstinspires.ftc.teamcode.drive.opmode.Teleop.NewTeleop3red.state.transfer;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -48,13 +48,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 @Config
-@TeleOp(name="Blue Teleop")
-public class NewTeleop3 extends OpMode {
+@TeleOp(name="Red Teleop")
+public class NewTeleop3red extends OpMode {
 
     private IMU imu;
     private double slow = 1.0;
     private double turnslow = 1.0;
     private double progSlowmode = 1.0;
+
+    private boolean panfunction = false;
 
     private boolean left = false;
     private boolean right = false;
@@ -98,12 +100,12 @@ public class NewTeleop3 extends OpMode {
     public static double e = 0.52;
 
     public static double wpos = 0.48;
-    public static double ppos = 0.22;
-    public static double tpos = 0.19;
+    public static double ppos = 0.47;
+    public static double tpos = 0.32;
     public static double c1pos = 0;
     public static double c2pos = 0.98;
     public static double apos = 0.51;
-    public static double pposadd = 0.468-0.25;
+    public static double pposadd = 0.468;
 
     public Servo pivotleft;
     public Servo pivotright;
@@ -158,7 +160,6 @@ public class NewTeleop3 extends OpMode {
     }
 
     public TouchSensor intSensor1;
-    public TouchSensor funnelsensor;
     public TouchSensor intSensor2;
 
     public static double finalconvert;
@@ -204,7 +205,6 @@ public class NewTeleop3 extends OpMode {
         intakeRightExt.setDirection(DcMotorSimple.Direction.REVERSE);
 
         intSensor1 = hardwareMap.get(TouchSensor.class, "2");
-        funnelsensor = hardwareMap.get(TouchSensor.class, "3");
         intSensor2 = hardwareMap.get(TouchSensor.class, "4");
 
 
@@ -243,7 +243,7 @@ public class NewTeleop3 extends OpMode {
         pivotright.setPosition(0.7);
 
         wrist.setPosition(0.48);
-        pan.setPosition(0.22);
+        pan.setPosition(0.47);
         claw1.setPosition(0);
         claw2.setPosition(0.98);
         airplane.setPosition(0.5);
@@ -284,15 +284,12 @@ public class NewTeleop3 extends OpMode {
         }
 
         double currentHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-        double angle = Math.toDegrees(currentHeading) + 90;
+        double angle = Math.toDegrees(currentHeading) - 90;
         double modifiedHeading = modify(Math.toDegrees(currentHeading));
 
         double errorOut =  modifiedHeading - Math.toDegrees(targetAngleOut);
         double errorInt = Math.toDegrees(currentHeading) - Math.toDegrees(targetAngleInt);
         double admissibleError = Math.toRadians(1);
-
-//        ppos = Range.clip(-0.00603*(angle)+pposadd, 0.22, 0.72);
-
 
         if(gamepad1.options){
             targetAngleOut = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
@@ -352,7 +349,7 @@ public class NewTeleop3 extends OpMode {
             case initialization1:
                 Otarget = 200;
                 if(Math.abs(outtakeMotor.getCurrentPosition()) > 150){
-                    tpos = 0.19;
+                    tpos = 0.32;
                     timer.reset();
                     New = initialization2;
                 }
@@ -360,7 +357,7 @@ public class NewTeleop3 extends OpMode {
 
             case initialization2:
                 if(timer.seconds() > 0.5){
-                    Otarget = 10;
+                    Otarget = 30;
                     timer.reset();
                     New = pre;
                 }
@@ -373,7 +370,7 @@ public class NewTeleop3 extends OpMode {
                     timer.reset();
                     New = cancelinter1;
                 }else{
-                    Otarget = 10;
+                    Otarget = 30;
                     p = 0.83;
                     e = 0.72;
                     timer.reset();
@@ -405,7 +402,7 @@ public class NewTeleop3 extends OpMode {
 
             case pre:
                 //move to intake
-                Otarget = 10;
+                Otarget = 50;
                 if(counter == 0){
                     p = 0.33;
                 }else{
@@ -527,8 +524,8 @@ public class NewTeleop3 extends OpMode {
 
             case outtakepre:
 //                intakeMotor.setPower(1);
-//                intakePower = 0.8;
-                intakeMotor.setPower((Math.pow((timer.seconds()), 2) * 1.25));
+                intakePower = 1;
+//                intakeMotor.setPower((Math.pow((timer.seconds()), 2) * 1.25));
                 if(timer.seconds() > 1){
                     timer.reset();
                     New = outtakeinter;
@@ -559,7 +556,7 @@ public class NewTeleop3 extends OpMode {
 
             case barrierpreinter:
                 if(timer.seconds() > 0.1){
-                    tpos = 0.57;
+                    tpos = 0.69;
                     timer.reset();
                     New = barrierinter;
                 }
@@ -567,8 +564,11 @@ public class NewTeleop3 extends OpMode {
                 break;
 
             case barrierinter:
-
-                ppos = Range.clip(-0.00603*(angle)+pposadd, 0.22, 0.72);
+                if(!panfunction){
+                    ppos = Range.clip(-0.00603*(angle)+pposadd, 0.22, 0.72);
+                }else{
+                    ppos = 0.47;
+                }
 
                 if(gamepad2.circle){
                     timer.reset();
@@ -627,35 +627,29 @@ public class NewTeleop3 extends OpMode {
 
             case redo:
                 if(timer.seconds() > 0){
-                    ppos = 0.22;
+                    ppos = 0.47;
                     wpos = 0.48;
                 }
                 if(timer.seconds() > 0.25){
-                    tpos = 0.19;
+                    tpos = 0.32;
                     left = false;
                     right = false;
                     c1pos = 0;
                     c2pos = 0.98;
                 }
-                if(timer.seconds() > 0.55){
+                if(timer.seconds() > 0.4){
                     Otarget = 100;
                 }
-
-                if(timer.seconds() > 0.7){
-                    Otarget = -50;
-                }
-                if(timer.seconds() > 0.8){
+                if(timer.seconds() > 0.55){
                     timer.reset();
                     New = barrier;
                 }
-
-
 
                 break;
 
             case deposit:
                 if(timer.seconds() > 0.5){
-                    tpos= 0.19;
+                    tpos= 0.32;
                     wpos = 0.48;
                     leftBackPower += -0.3;
                     leftFrontPower += -0.3;
@@ -664,8 +658,8 @@ public class NewTeleop3 extends OpMode {
                 }
 
                 if(timer.seconds()> 0.8){
-                    ppos = 0.22;
-                    tpos = 0.19;
+                    ppos = 0.47;
+                    tpos = 0.32;
                 }
 
                 if(timer.seconds() > 1.25){
@@ -678,7 +672,7 @@ public class NewTeleop3 extends OpMode {
                     right = false;
                     c1pos = 0;
                     c2pos = 0.98;
-                    tpos = 0.19;
+                    tpos = 0.32;
                     timer.reset();
                     New = pre;
                 }
@@ -765,6 +759,10 @@ public class NewTeleop3 extends OpMode {
             lift.setPower(0);
         }
 
+
+        if(gamepad1.dpad_up){
+            panfunction = true;
+        }
         double angleError = 0;
 
         double errorOuttest = Math.toDegrees(currentHeading) - Math.toDegrees(targetAngleOut);
@@ -784,9 +782,6 @@ public class NewTeleop3 extends OpMode {
         telemetry.addData("left", intakeLeftExt.getCurrentPosition());
         telemetry.addData("right", intakeRightExt.getCurrentPosition());
         telemetry.addData("out", outtakeMotor.getCurrentPosition());
-        telemetry.addData("funnel sensor", funnelsensor.isPressed());
-        telemetry.addData("intake 1 ", intSensor1.isPressed());
-        telemetry.addData("intake 2", intSensor2.isPressed());
 
         telemetry.addData("pitch", imu.getRobotYawPitchRollAngles().getPitch(AngleUnit.RADIANS));
 

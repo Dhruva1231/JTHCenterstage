@@ -15,11 +15,19 @@ public class MeepMeepTesting {
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 15)
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(new Pose2d(0, 0, Math.toRadians(0)))
-                                .lineToConstantHeading(new Vector2d(26, 35.25)).waitSeconds(1)
-                                .splineTo(new Vector2d(48, 10), Math.toRadians(-102.5))
+                                .lineToLinearHeading(new Pose2d(23, 17, Math.toRadians(-40)))
+                                .setReversed(true)
+                                .lineToLinearHeading(new Pose2d(20, 37, Math.toRadians(-90)))
+                                .waitSeconds(0.5)
+                                .setReversed(false)
+                                .splineTo(new Vector2d(49, 18), Math.toRadians(-91.75))
+                                .splineToLinearHeading(new Pose2d(49, -30.5, Math.toRadians(-91.75)), Math.toRadians(270))
+                                .setReversed(true)
+                                .splineTo(new Vector2d(49, 10), Math.toRadians(90))
+                                .splineTo(new Vector2d(40, 35), Math.toRadians(-235))
 
 
-                        .build()
+                                .build()
                 );
 
         meepMeep.setBackground(MeepMeep.Background.FIELD_CENTERSTAGE_JUICE_DARK)
